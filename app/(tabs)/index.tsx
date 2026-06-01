@@ -434,10 +434,10 @@ export default function HomeScreen() {
                 <Text style={[styles.featuredUnit, { color: d.textMuted }]}> {featuredProduct.unit}</Text>
               </Text>
               <Pressable
-                style={[styles.addBtnSmall, { backgroundColor: d.accentLight, borderColor: d.border }]}
+                style={[styles.addBtnSmall, { backgroundColor: d.isDark ? '#2E7D32' : d.accentLight, borderColor: d.isDark ? '#43A047' : d.border }]}
                 onPress={() => handleAddToCart(featuredProduct)}
               >
-                <Ionicons name="cart-outline" size={20} color={colors.primary} />
+                <Ionicons name="cart-outline" size={20} color={d.isDark ? '#FFFFFF' : colors.primary} />
               </Pressable>
             </View>
           </View>

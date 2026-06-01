@@ -147,18 +147,18 @@ export default function ProductDetailScreen() {
   // Show loading while fetching
   if (productLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#F5F7F5', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#2E7D32" />
+      <View style={{ flex: 1, backgroundColor: d.bg, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={d.accent} />
       </View>
     );
   }
 
   if (!product) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#F5F7F5', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
-        <Ionicons name="leaf-outline" size={48} color="rgba(27,60,18,0.2)" />
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#1B3C12', marginTop: 16 }}>Product Not Found</Text>
-        <Text style={{ fontSize: 14, color: 'rgba(27,60,18,0.5)', marginTop: 6, textAlign: 'center' }}>This product may have been removed.</Text>
+      <View style={{ flex: 1, backgroundColor: d.bg, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+        <Ionicons name="leaf-outline" size={48} color={d.textDim} />
+        <Text style={{ fontSize: 18, fontWeight: '700', color: d.text, marginTop: 16 }}>Product Not Found</Text>
+        <Text style={{ fontSize: 14, color: d.textMuted, marginTop: 6, textAlign: 'center' }}>This product may have been removed.</Text>
         <Pressable
           style={{ marginTop: 20, backgroundColor: '#2E7D32', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999 }}
           onPress={() => router.back()}
@@ -171,10 +171,10 @@ export default function ProductDetailScreen() {
 
   if (isHidden) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#F5F7F5', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
-        <Ionicons name="eye-off-outline" size={48} color="rgba(27,60,18,0.2)" />
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#1B3C12', marginTop: 16 }}>Product Unavailable</Text>
-        <Text style={{ fontSize: 14, color: 'rgba(27,60,18,0.5)', marginTop: 6, textAlign: 'center' }}>This product is currently not available.</Text>
+      <View style={{ flex: 1, backgroundColor: d.bg, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+        <Ionicons name="eye-off-outline" size={48} color={d.textDim} />
+        <Text style={{ fontSize: 18, fontWeight: '700', color: d.text, marginTop: 16 }}>Product Unavailable</Text>
+        <Text style={{ fontSize: 14, color: d.textMuted, marginTop: 6, textAlign: 'center' }}>This product is currently not available.</Text>
         <Pressable
           style={{ marginTop: 20, backgroundColor: '#2E7D32', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999 }}
           onPress={() => router.back()}
@@ -347,7 +347,7 @@ export default function ProductDetailScreen() {
   return (
     <View style={[s.container, { backgroundColor: d.bg }]}>
       {/* Close Button */}
-      <Pressable style={s.closeBtn} onPress={() => router.back()}>
+      <Pressable style={[s.closeBtn, { backgroundColor: d.cardBg, borderColor: d.border }]} onPress={() => router.back()}>
         <Ionicons name="close" size={24} color={d.text} />
       </Pressable>
 
@@ -398,40 +398,40 @@ export default function ProductDetailScreen() {
 
         {/* ── Product Info ── */}
         <View style={s.body}>
-          <Text style={s.tag}>{product.tag}</Text>
+          <Text style={[s.tag, { color: d.isDark ? '#81C784' : '#43A047' }]}>{product.tag}</Text>
           <Text style={[s.name, { color: d.text }]}>{product.name}</Text>
-          <Text style={s.origin}>{product.origin}</Text>
+          <Text style={[s.origin, { color: d.textMuted }]}>{product.origin}</Text>
 
           {/* Rating summary */}
           {reviews.length > 0 && (
             <Pressable style={s.ratingSummary} onPress={() => {}}>
               {renderStars(Math.round(avgRating))}
-              <Text style={s.ratingAvg}>{avgRating.toFixed(1)}</Text>
-              <Text style={s.ratingCount}>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</Text>
+              <Text style={[s.ratingAvg, { color: d.text }]}>{avgRating.toFixed(1)}</Text>
+              <Text style={[s.ratingCount, { color: d.textMuted }]}>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</Text>
             </Pressable>
           )}
 
-          <Text style={s.description}>{product.description}</Text>
+          <Text style={[s.description, { color: d.textSecondary }]}>{product.description}</Text>
         </View>
 
         {/* ── Reviews Section ── */}
-        <View style={s.reviewsSection}>
+        <View style={[s.reviewsSection, { borderTopColor: d.border }]}>
           <View style={s.reviewsHeader}>
-            <Text style={s.reviewsTitle}>Reviews</Text>
+            <Text style={[s.reviewsTitle, { color: d.text }]}>Reviews</Text>
             <Pressable
-              style={s.writeReviewBtn}
+              style={[s.writeReviewBtn, { backgroundColor: d.accentLight, borderColor: d.border }]}
               onPress={() => setShowReviewForm(!showReviewForm)}
             >
-              <Ionicons name={showReviewForm ? 'close' : 'create-outline'} size={16} color="#2E7D32" />
-              <Text style={s.writeReviewText}>{showReviewForm ? 'Cancel' : 'Write Review'}</Text>
+              <Ionicons name={showReviewForm ? 'close' : 'create-outline'} size={16} color={d.accent} />
+              <Text style={[s.writeReviewText, { color: d.accent }]}>{showReviewForm ? 'Cancel' : 'Write Review'}</Text>
             </Pressable>
           </View>
 
           {/* ── Write Review Form ── */}
           {showReviewForm && (
-            <View style={s.reviewForm}>
+            <View style={[s.reviewForm, { backgroundColor: d.cardBg, borderColor: d.border }]}>
               {/* Star selector */}
-              <Text style={s.reviewFormLabel}>Your Rating</Text>
+              <Text style={[s.reviewFormLabel, { color: d.textMuted }]}>Your Rating</Text>
               <View style={s.starSelector}>
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Pressable key={i} onPress={() => setReviewRating(i)}>
@@ -446,7 +446,7 @@ export default function ProductDetailScreen() {
 
               {/* Comment */}
               <TextInput
-                style={s.reviewInput}
+                style={[s.reviewInput, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
                 placeholder="Share your experience..."
                 placeholderTextColor={d.textDim}
                 value={reviewComment}
@@ -475,9 +475,9 @@ export default function ProductDetailScreen() {
 
               {/* Actions */}
               <View style={s.reviewFormActions}>
-                <Pressable style={s.attachBtn} onPress={pickReviewImage}>
-                  <Ionicons name="camera-outline" size={18} color="#2E7D32" />
-                  <Text style={s.attachText}>Photo ({reviewImages.length}/3)</Text>
+                <Pressable style={[s.attachBtn, { backgroundColor: d.accentLight, borderColor: d.border }]} onPress={pickReviewImage}>
+                  <Ionicons name="camera-outline" size={18} color={d.accent} />
+                  <Text style={[s.attachText, { color: d.accent }]}>Photo ({reviewImages.length}/3)</Text>
                 </Pressable>
                 <Pressable
                   style={[s.submitReviewBtn, submittingReview && { opacity: 0.6 }]}
@@ -496,25 +496,25 @@ export default function ProductDetailScreen() {
 
           {/* ── Reviews List ── */}
           {loadingReviews ? (
-            <ActivityIndicator style={{ paddingVertical: 20 }} color="#2E7D32" />
+            <ActivityIndicator style={{ paddingVertical: 20 }} color={d.accent} />
           ) : reviews.length === 0 ? (
             <View style={s.emptyReviews}>
-              <Ionicons name="chatbubble-ellipses-outline" size={32} color="rgba(27,60,18,0.15)" />
-              <Text style={s.emptyReviewsText}>No reviews yet</Text>
-              <Text style={s.emptyReviewsSub}>Be the first to review this product!</Text>
+              <Ionicons name="chatbubble-ellipses-outline" size={32} color={d.textDim} />
+              <Text style={[s.emptyReviewsText, { color: d.textDim }]}>No reviews yet</Text>
+              <Text style={[s.emptyReviewsSub, { color: d.textDim }]}>Be the first to review this product!</Text>
             </View>
           ) : (
             reviews.map((rev) => (
-              <View key={rev.id} style={s.reviewCard}>
+              <View key={rev.id} style={[s.reviewCard, { backgroundColor: d.cardBg, borderColor: d.border }]}>
                 <View style={s.reviewCardHeader}>
-                  <View style={s.reviewAvatar}>
-                    <Text style={s.reviewAvatarText}>{(rev.user_name || '?')[0].toUpperCase()}</Text>
+                  <View style={[s.reviewAvatar, { backgroundColor: d.accentLight }]}>
+                    <Text style={[s.reviewAvatarText, { color: d.accent }]}>{(rev.user_name || '?')[0].toUpperCase()}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.reviewUserName}>{rev.user_name}</Text>
+                    <Text style={[s.reviewUserName, { color: d.text }]}>{rev.user_name}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       {renderStars(rev.rating, 12)}
-                      <Text style={s.reviewTime}>{timeAgo(rev.created_at)}</Text>
+                      <Text style={[s.reviewTime, { color: d.textDim }]}>{timeAgo(rev.created_at)}</Text>
                     </View>
                   </View>
                   {/* Delete own review */}
@@ -527,11 +527,11 @@ export default function ProductDetailScreen() {
                         showToast('Review deleted');
                       }}
                     >
-                      <Ionicons name="trash-outline" size={16} color="rgba(27,60,18,0.25)" />
+                      <Ionicons name="trash-outline" size={16} color={d.textDim} />
                     </Pressable>
                   )}
                 </View>
-                {rev.comment ? <Text style={s.reviewComment}>{rev.comment}</Text> : null}
+                {rev.comment ? <Text style={[s.reviewComment, { color: d.textSecondary }]}>{rev.comment}</Text> : null}
                 {rev.image_urls?.length > 0 && (
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
                     <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -550,14 +550,14 @@ export default function ProductDetailScreen() {
       </ScrollView>
 
       {/* ── Footer ── */}
-      <View style={s.footer}>
-        <View style={s.qtyControl}>
-          <Pressable style={s.qtyBtn} onPress={() => setQty((q) => Math.max(1, q - 1))}>
-            <Ionicons name="remove" size={20} color="#2E7D32" />
+      <View style={[s.footer, { backgroundColor: d.isDark ? 'rgba(13,27,15,0.95)' : 'rgba(255, 255, 255, 0.9)', borderColor: d.border }]}>
+        <View style={[s.qtyControl, { backgroundColor: d.accentLight, borderColor: d.border }]}>
+          <Pressable style={[s.qtyBtn, { backgroundColor: d.accentLight }]} onPress={() => setQty((q) => Math.max(1, q - 1))}>
+            <Ionicons name="remove" size={20} color={d.accent} />
           </Pressable>
-          <Text style={s.qtyText}>{qty}</Text>
-          <Pressable style={s.qtyBtn} onPress={() => setQty((q) => q + 1)}>
-            <Ionicons name="add" size={20} color="#2E7D32" />
+          <Text style={[s.qtyText, { color: d.text }]}>{qty}</Text>
+          <Pressable style={[s.qtyBtn, { backgroundColor: d.accentLight }]} onPress={() => setQty((q) => q + 1)}>
+            <Ionicons name="add" size={20} color={d.accent} />
           </Pressable>
         </View>
         <Pressable style={s.addBtn} onPress={handleAdd}>
