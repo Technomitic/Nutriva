@@ -441,46 +441,72 @@ export default function AdminScreen() {
         return;
       }
 
-      const ext = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
+      // Determine file extension from mimeType (more reliable than URI on mobile)
+      const mimeToExt: Record<string, string> = {
+        'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
+      };
+      const ext = mimeToExt[asset.mimeType || ''] || 'jpg';
       const fileName = `product_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
       const filePath = `products/${fileName}`;
-
-      // Use FormData for cross-platform compatibility
-      const formData = new FormData();
-      if (Platform.OS === 'web') {
-        const response = await fetch(asset.uri);
-        const blob = await response.blob();
-        formData.append('', blob, `product.${ext}`);
-      } else {
-        formData.append('', {
-          uri: asset.uri,
-          name: `product.${ext}`,
-          type: asset.mimeType || `image/${ext}`,
-        } as any);
-      }
 
       const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
       const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token || supabaseKey;
 
-      const uploadRes = await fetch(
-        `${supabaseUrl}/storage/v1/object/product-images/${filePath}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'apikey': supabaseKey || '',
-            'x-upsert': 'true',
-          },
-          body: formData,
-        }
-      );
+      let uploadOk = false;
 
-      if (!uploadRes.ok) {
-        showToast('Upload failed');
-        setImageUploading(false);
-        return;
+      if (Platform.OS === 'web') {
+        // Web: use blob
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+        const formData = new FormData();
+        formData.append('', blob, `product.${ext}`);
+
+        const uploadRes = await fetch(
+          `${supabaseUrl}/storage/v1/object/product-images/${filePath}`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'apikey': supabaseKey || '',
+              'x-upsert': 'true',
+            },
+            body: formData,
+          }
+        );
+        uploadOk = uploadRes.ok;
+        if (!uploadOk) {
+          const errText = await uploadRes.text().catch(() => 'Unknown error');
+          showToast(`Upload failed: ${errText.slice(0, 80)}`);
+          setImageUploading(false);
+          return;
+        }
+      } else {
+        // Mobile: fetch the image as a blob and upload via arraybuffer
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+
+        const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as ArrayBuffer);
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(blob);
+        });
+
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, arrayBuffer, {
+            contentType: asset.mimeType || `image/${ext}`,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          showToast(`Upload failed: ${uploadError.message}`);
+          setImageUploading(false);
+          return;
+        }
+        uploadOk = true;
       }
 
       // Get the public URL
