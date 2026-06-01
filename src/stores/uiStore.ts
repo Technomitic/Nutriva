@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand';
+import { sanitizeError } from '../utils/sanitizeError';
 
 interface UIState {
   toast: { message: string; visible: boolean };
@@ -15,7 +16,8 @@ export const useUIStore = create<UIState>((set) => ({
   toast: { message: '', visible: false },
 
   showToast: (message) => {
-    set({ toast: { message, visible: true } });
+    const clean = sanitizeError(message);
+    set({ toast: { message: clean, visible: true } });
     setTimeout(() => {
       set({ toast: { message: '', visible: false } });
     }, 2500);

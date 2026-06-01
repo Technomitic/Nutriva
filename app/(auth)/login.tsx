@@ -16,6 +16,7 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
+import { sanitizeError } from '../../src/utils/sanitizeError';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 
@@ -304,7 +305,7 @@ export default function LoginScreen() {
                   if (resetErr) throw resetErr;
                   showToast('Password reset link sent to your email! 📧');
                 } catch (err: any) {
-                  setError(err.message || 'Failed to send reset email');
+                  setError(sanitizeError(err.message) || 'Failed to send reset email');
                 } finally {
                   setForgotLoading(false);
                 }

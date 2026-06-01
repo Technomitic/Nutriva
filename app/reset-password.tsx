@@ -14,6 +14,7 @@ import { colors, spacing, radius } from '../src/theme';
 import { supabase } from '../src/api/supabase';
 import { useUIStore } from '../src/stores/uiStore';
 import { useDynamic } from '../src/hooks/useDynamic';
+import { sanitizeError } from '../src/utils/sanitizeError';
 
 export default function ResetPasswordScreen() {
   const d = useDynamic();
@@ -63,7 +64,7 @@ export default function ResetPasswordScreen() {
         router.replace('/(auth)/login');
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to update password');
+      setError(sanitizeError(err.message) || 'Failed to update password');
     } finally {
       setLoading(false);
     }

@@ -16,6 +16,7 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
+import { sanitizeError } from '../../src/utils/sanitizeError';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 const FRUITS = ['🍎', '🍊', '🍋', '🍇', '🍓', '🥭', '🍑', '🍌', '🫐', '🍒', '🥝', '🍍'];
@@ -143,7 +144,7 @@ export default function SignupScreen() {
       const msg =
         err.message?.includes('already registered')
           ? 'This email is already registered'
-          : err.message || 'Signup failed';
+          : sanitizeError(err.message) || 'Signup failed';
       setError(msg);
     } finally {
       setLoading(false);
