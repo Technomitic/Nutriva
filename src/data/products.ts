@@ -1,0 +1,182 @@
+/**
+ * Fresh — Product seed data
+ * Ported from the original main.js products array
+ */
+
+import { Product, BulkDeal, FestivalPack, DeliveryBoy } from '../types';
+
+export const products: Product[] = [
+  {
+    id: 'mango',
+    name: 'Organic Mango',
+    variety: 'Alphonso',
+    origin: 'Freshly Harvested · Ratnagiri, India',
+    price: 349,
+    unit: '/kg',
+    image: require('../../assets/images/mango.png'),
+    tag: 'SEASONAL PICK',
+    description: 'The Alphonso mango is the king of mangoes, prized for its rich, creamy texture and intense sweetness.',
+    freshness: 'Picked today',
+    stock: 120,
+    max_stock: 150,
+    active: true,
+  },
+  {
+    id: 'oranges',
+    name: 'Valencia Oranges',
+    variety: 'Valencia',
+    origin: 'Picked yesterday · CA, USA',
+    price: 199,
+    unit: '/kg',
+    image: require('../../assets/images/oranges.png'),
+    tag: 'FARM FRESH',
+    description: 'Valencia oranges are the quintessential juicing orange. Seedless, sweet, and bursting with sunshine.',
+    freshness: 'Picked yesterday',
+    stock: 85,
+    max_stock: 100,
+    active: true,
+  },
+  {
+    id: 'bananas',
+    name: 'Cavendish Bananas',
+    variety: 'Cavendish',
+    origin: 'Fresh Import · Ecuador',
+    price: 79,
+    unit: '/dozen',
+    image: require('../../assets/images/bananas.png'),
+    tag: 'IMPORTED',
+    description: 'Premium Cavendish bananas imported from Ecuador. Perfectly ripened, creamy texture.',
+    freshness: 'Fresh import',
+    stock: 45,
+    max_stock: 100,
+    active: true,
+  },
+  {
+    id: 'cherries',
+    name: 'Rainier Cherries',
+    variety: 'Rainier',
+    origin: 'Hand-picked · Washington, USA',
+    price: 899,
+    unit: '/500g',
+    image: require('../../assets/images/cherries.png'),
+    tag: 'PREMIUM',
+    description: 'Rainier cherries are exceptionally sweet with a delicate flavor.',
+    freshness: 'Hand-picked',
+    stock: 12,
+    max_stock: 50,
+    active: true,
+  },
+  {
+    id: 'pineapple',
+    name: 'Honeyglow Pineapple',
+    variety: 'Honeyglow',
+    origin: 'Tropical Harvest · Costa Rica',
+    price: 249,
+    unit: '/whole',
+    image: require('../../assets/images/pineapple.png'),
+    tag: 'TROPICAL',
+    description: 'The Honeyglow pineapple is 35% sweeter than standard varieties.',
+    freshness: 'Tropical harvest',
+    stock: 38,
+    max_stock: 60,
+    active: true,
+  },
+  {
+    id: 'apple',
+    name: 'Honeycrisp Apple',
+    variety: 'Honeycrisp',
+    origin: 'Artisan Orchard · Minnesota, USA',
+    price: 189,
+    unit: '/kg',
+    image: require('../../assets/images/apple.png'),
+    tag: 'ARTISANAL',
+    description: 'The Honeycrisp apple is prized for its exceptionally crisp texture.',
+    freshness: 'Just arrived',
+    stock: 95,
+    max_stock: 120,
+    active: true,
+  },
+  {
+    id: 'pomegranate',
+    name: 'Ruby Pomegranate',
+    variety: 'Bhagwa',
+    origin: 'Orchards · Maharashtra, India',
+    price: 220,
+    unit: '/kg',
+    image: require('../../assets/images/apple.png'),
+    tag: 'SEASONAL',
+    description: 'Deep ruby arils bursting with antioxidant-rich juice.',
+    freshness: 'Farm fresh',
+    stock: 60,
+    max_stock: 80,
+    active: true,
+  },
+];
+
+export const bulkDeals: BulkDeal[] = [
+  {
+    id: 'banana-bulk',
+    name: 'Banana Bulk Pack',
+    image: require('../../assets/images/bananas.png'),
+    desc: 'Premium Cavendish bananas in bulk',
+    tiers: [
+      { qty: '5 dozen', price: 350, original: 395, save: '11%' },
+      { qty: '10 dozen', price: 650, original: 790, save: '18%' },
+    ],
+  },
+  {
+    id: 'mango-bulk',
+    name: 'Alphonso Mango Crate',
+    image: require('../../assets/images/mango.png'),
+    desc: 'King of mangoes from Ratnagiri',
+    tiers: [
+      { qty: '5 kg', price: 1599, original: 1745, save: '8%' },
+      { qty: '10 kg', price: 2999, original: 3490, save: '14%' },
+    ],
+  },
+  {
+    id: 'orange-bulk',
+    name: 'Valencia Orange Box',
+    image: require('../../assets/images/oranges.png'),
+    desc: 'Sweet juicing oranges',
+    tiers: [
+      { qty: '5 kg', price: 899, original: 995, save: '10%' },
+      { qty: '12 kg', price: 1999, original: 2388, save: '16%' },
+    ],
+  },
+];
+
+export const festivalPacks: FestivalPack[] = [
+  {
+    id: 'puja-pack',
+    name: 'Puja Fruit Pack',
+    desc: 'Complete fruit offering for pooja',
+    items: [
+      { name: 'Banana', qty: '5 dozen' },
+      { name: 'Apple', qty: '2 kg' },
+      { name: 'Pomegranate', qty: '2 kg' },
+    ],
+    price: 1299,
+    original: 1650,
+  },
+  {
+    id: 'party-pack',
+    name: 'Party Fruit Platter',
+    desc: 'Premium assorted fruits for celebrations',
+    items: [
+      { name: 'Mango', qty: '3 kg' },
+      { name: 'Pineapple', qty: '3 whole' },
+      { name: 'Cherries', qty: '1 kg' },
+      { name: 'Oranges', qty: '3 kg' },
+    ],
+    price: 2999,
+    original: 3850,
+  },
+];
+
+export const deliveryBoysData: DeliveryBoy[] = [
+  { id: 'db1', name: 'Rahul Kumar', phone: '9876543210', area: 'North Hub', status: 'available', deliveries: 45 },
+  { id: 'db2', name: 'Suresh Patel', phone: '9876543211', area: 'South Station', status: 'busy', deliveries: 62 },
+  { id: 'db3', name: 'Amit Singh', phone: '9876543212', area: 'East Orchard', status: 'available', deliveries: 38 },
+  { id: 'db4', name: 'Vijay Sharma', phone: '9876543213', area: 'West Side', status: 'offline', deliveries: 28 },
+];

@@ -1,0 +1,802 @@
+/**
+ * Fresh — Home / Shop Screen
+ * Ported from page--home: hero, search, harvest grid, bulk banner, featured card
+ */
+
+import { useState, useCallback, useEffect } from 'react';
+import {
+  View, Text, ScrollView, Pressable, Image,
+  TextInput, StyleSheet, RefreshControl, Dimensions, Animated,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, spacing, radius, typography, glass } from '../../src/theme';
+import { products } from '../../src/data/products';
+import { useCartStore } from '../../src/stores/cartStore';
+import { useUIStore } from '../../src/stores/uiStore';
+import { useWishlistStore } from '../../src/stores/wishlistStore';
+import { useAuthStore } from '../../src/stores/authStore';
+import { Product } from '../../src/types';
+import { supabase } from '../../src/api/supabase';
+import { useDynamic } from '../../src/hooks/useDynamic';
+import { useT } from '../../src/i18n';
+import {
+  useHeroEntrance, useStaggerEntrance, useCardEntrance3D,
+  useSectionEntrance, useFloating, useParallaxScroll,
+} from '../../src/utils/animations';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = (Math.min(SCREEN_WIDTH, 430) - spacing.lg * 2 - spacing.base) / 2;
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const addItem = useCartStore((s) => s.addItem);
+  const showToast = useUIStore((s) => s.showToast);
+  const user = useAuthStore((s) => s.user);
+  const { items: wishlistItems, toggleWishlist, isWishlisted, loadWishlist } = useWishlistStore();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [productRatings, setProductRatings] = useState<Record<string, { avg: number; count: number }>>({});
+  const [sortBy, setSortBy] = useState<'default' | 'price-low' | 'price-high'>('default');
+  const [filterTag, setFilterTag] = useState<string>('all');
+  const [showSort, setShowSort] = useState(false);
+  const d = useDynamic();
+  const t = useT();
+
+  const FILTER_TAGS = ['all', 'SEASONAL', 'IMPORTED', 'TROPICAL', 'PREMIUM', 'FARM FRESH'];
+
+  // Load wishlist on auth
+  useEffect(() => {
+    if (user?.id) loadWishlist(user.id);
+  }, [user?.id]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
+
+  const handleAddToCart = (product: Product) => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      variety: product.variety,
+      unit: product.unit,
+    });
+    showToast(`${product.name} added to basket`);
+  };
+
+  const [supabaseProducts, setSupabaseProducts] = useState<Product[]>([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
+
+  // Fetch products from Supabase, merging with local image assets
+  const loadProducts = useCallback(async () => {
+    if (!supabase) {
+      // No Supabase configured — use static data as sole source
+      setSupabaseProducts(products.filter((p) => p.active !== false));
+      setProductsLoaded(true);
+      return;
+    }
+    // Include products where active is explicitly true OR null (never set)
+    // Only exclude products where active is explicitly false
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .or('active.eq.true,active.is.null')
+      .order('name', { ascending: true });
+    if (data && data.length > 0) {
+      // Merge Supabase product data with local images
+      const merged = data.map((dbProd: any) => {
+        const local = products.find((p) => p.id === dbProd.id);
+        return {
+          ...dbProd,
+          // Use local asset if available, otherwise null (will fall back to image_url)
+          image: local?.image || null,
+          freshness: dbProd.freshness || local?.freshness || 'Fresh',
+        } as Product;
+      });
+      setSupabaseProducts(merged);
+    }
+    setProductsLoaded(true);
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  // Re-fetch on pull-to-refresh
+  useEffect(() => {
+    if (refreshing) loadProducts();
+  }, [refreshing, loadProducts]);
+
+  // Poll for product changes every 10 seconds so admin visibility
+  // toggles are reflected without needing pull-to-refresh
+  useEffect(() => {
+    if (!supabase) return;
+    const interval = setInterval(loadProducts, 10000);
+    return () => clearInterval(interval);
+  }, [loadProducts]);
+
+  // Single source of truth — no mixing static and Supabase data
+  const displayProducts = supabaseProducts
+    .filter((p) => p.id !== 'pomegranate')
+    .filter((p) =>
+      searchQuery
+        ? p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.variety?.toLowerCase().includes(searchQuery.toLowerCase())
+        : true
+    )
+    .filter((p) =>
+      filterTag === 'all' ? true : (p.tag || '').toUpperCase().includes(filterTag)
+    )
+    .sort((a, b) => {
+      if (sortBy === 'price-low') return a.price - b.price;
+      if (sortBy === 'price-high') return b.price - a.price;
+      return 0;
+    });
+
+  const [heroId, setHeroId] = useState('mango');
+  const [editorsPickId, setEditorsPickId] = useState('apple');
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.from('products').select('id, is_hero, is_editors_pick').then(({ data }) => {
+      if (!data) return;
+      const hero = data.find((p: any) => p.is_hero);
+      const pick = data.find((p: any) => p.is_editors_pick);
+      if (hero) setHeroId(hero.id);
+      if (pick) setEditorsPickId(pick.id);
+    });
+  }, []);
+
+  // Fetch product ratings
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.from('reviews').select('product_id, rating').then(({ data }) => {
+      if (!data) return;
+      const stats: Record<string, { sum: number; count: number }> = {};
+      data.forEach((r: any) => {
+        if (!stats[r.product_id]) stats[r.product_id] = { sum: 0, count: 0 };
+        stats[r.product_id].sum += r.rating;
+        stats[r.product_id].count += 1;
+      });
+      const result: Record<string, { avg: number; count: number }> = {};
+      Object.entries(stats).forEach(([id, s]) => {
+        result[id] = { avg: s.sum / s.count, count: s.count };
+      });
+      setProductRatings(result);
+    });
+  }, []);
+
+  const heroProduct = products.find((p) => p.id === heroId) || products[0];
+  const featuredProduct = products.find((p) => p.id === editorsPickId) || products.find((p) => p.id === 'apple')!;
+
+  // ── Animations ──
+  const heroAnim = useHeroEntrance();
+  const heroFloat = useFloating(4000, 6);
+  const { scrollY, headerStyle } = useParallaxScroll();
+  const cardAnims = useStaggerEntrance(displayProducts.length, 60);
+  const bulkAnim = useCardEntrance3D(300);
+  const advanceAnim = useSectionEntrance(500);
+  const featuredAnim = useCardEntrance3D(600);
+
+  return (
+    <Animated.ScrollView
+      style={[styles.container, { backgroundColor: d.bg }]}
+      showsVerticalScrollIndicator={false}
+      onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+      scrollEventThrottle={16}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+      }
+    >
+      {/* ===== HERO ===== */}
+      <Animated.View style={[styles.hero, heroAnim]}>
+        <View style={styles.heroContent}>
+          <View style={styles.heroTag}>
+          <Text style={styles.heroTagText}>{heroProduct.tag || t('home.hero_tag')}</Text>
+          </View>
+          <Text style={styles.heroTitle}>{heroProduct.name.split(' ').join('\n')}</Text>
+          <Text style={styles.heroSub}>{heroProduct.origin}</Text>
+          <Pressable
+            style={styles.heroCta}
+            onPress={() => handleAddToCart(heroProduct)}
+          >
+            <Ionicons name="add" size={18} color={colors.primary} />
+            <Text style={styles.heroCtaText}>{t('home.add_to_cart')} — ₹{heroProduct.price}</Text>
+          </Pressable>
+        </View>
+        <Animated.Image
+          source={heroProduct.image}
+          style={[styles.heroImage, heroFloat]}
+          resizeMode="contain"
+        />
+      </Animated.View>
+
+      {/* ===== SEARCH ===== */}
+      <View style={styles.searchBar}>
+        <Ionicons name="search" size={20} color="rgba(165,214,167,0.4)" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder={t('home.search_placeholder')}
+          placeholderTextColor="rgba(165,214,167,0.3)"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <Pressable
+          style={styles.sortBtn}
+          onPress={() => {
+            const next = sortBy === 'default' ? 'price-low' : sortBy === 'price-low' ? 'price-high' : 'default';
+            setSortBy(next);
+          }}
+        >
+          <Ionicons name="swap-vertical" size={18} color={sortBy !== 'default' ? '#2E7D32' : 'rgba(165,214,167,0.4)'} />
+        </Pressable>
+      </View>
+
+      {/* ===== FILTER CHIPS ===== */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filterRow}
+        contentContainerStyle={styles.filterRowContent}
+      >
+        {FILTER_TAGS.map((tag) => (
+          <Pressable
+            key={tag}
+            style={[styles.filterChip, filterTag === tag && styles.filterChipActive]}
+            onPress={() => setFilterTag(tag)}
+          >
+            <Text style={[styles.filterChipText, filterTag === tag && styles.filterChipTextActive]}>
+              {tag === 'all' ? `🍎 ${t('home.filter_all')}` : tag.charAt(0) + tag.slice(1).toLowerCase()}
+            </Text>
+          </Pressable>
+        ))}
+        {sortBy !== 'default' && (
+          <View style={[styles.filterChip, styles.filterChipActive]}>
+            <Ionicons name="swap-vertical" size={12} color="#fff" />
+            <Text style={[styles.filterChipText, styles.filterChipTextActive]}>
+              {sortBy === 'price-low' ? t('home.sort_price_low') : t('home.sort_price_high')}
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* ===== TODAY'S HARVEST ===== */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t('home.harvest_title')}</Text>
+          <Pressable>
+            <Text style={styles.sectionAction}>{t('common.see_all').toUpperCase()}</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.harvestGrid}>
+          {displayProducts.map((product, idx) => (
+            <Animated.View key={product.id} style={[cardAnims[idx] || {}]}>
+            <Pressable
+              style={styles.harvestCard}
+              onPress={() => router.push(`/product/${product.id}`)}
+            >
+              <View style={styles.harvestCardImg}>
+                {product.image ? (
+                  <Image source={product.image} style={styles.harvestImg} resizeMode="contain" />
+                ) : product.image_url ? (
+                  <Image source={{ uri: product.image_url }} style={styles.harvestImg} resizeMode="cover" />
+                ) : (
+                  <View style={{ width: '85%', height: '85%', borderRadius: 12, backgroundColor: 'rgba(46,125,50,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+                    <Ionicons name="leaf-outline" size={40} color="rgba(46,125,50,0.2)" />
+                  </View>
+                )}
+                {user && (
+                  <Pressable
+                    style={styles.wishlistHeart}
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      toggleWishlist(user.id, product.id);
+                    }}
+                  >
+                    <Ionicons
+                      name={isWishlisted(product.id) ? 'heart' : 'heart-outline'}
+                      size={18}
+                      color={isWishlisted(product.id) ? '#EF5350' : 'rgba(27,60,18,0.3)'}
+                    />
+                  </Pressable>
+                )}
+              </View>
+              <View style={styles.freshnessTag}>
+                <Text style={styles.freshnessText}>🟢 {product.freshness}</Text>
+              </View>
+              {productRatings[product.id] && (
+                <View style={styles.cardRating}>
+                  <Ionicons name="star" size={11} color="#F9A825" />
+                  <Text style={styles.cardRatingText}>
+                    {productRatings[product.id].avg.toFixed(1)}
+                  </Text>
+                  <Text style={styles.cardRatingCount}>({productRatings[product.id].count})</Text>
+                </View>
+              )}
+              <Text style={styles.harvestName}>{product.name}</Text>
+              <Text style={styles.harvestOrigin}>
+                {product.origin.split('·')[1]?.trim() || product.origin}
+              </Text>
+              <View style={styles.harvestFooter}>
+                <Text style={styles.harvestPrice}>₹{product.price}</Text>
+                <Pressable
+                  style={styles.addBtn}
+                  onPress={(e) => {
+                    e.stopPropagation?.();
+                    handleAddToCart(product);
+                  }}
+                >
+                  <Ionicons name="add" size={18} color={colors.onPrimary} />
+                </Pressable>
+              </View>
+            </Pressable>
+            </Animated.View>
+          ))}
+        </View>
+      </View>
+
+      {/* ===== BULK BANNER ===== */}
+      <Animated.View style={[styles.bulkBanner, bulkAnim]}>
+        <View style={styles.bulkBannerBadge}>
+          <Text style={styles.bulkBannerBadgeText}>SAVE 30%</Text>
+        </View>
+        <Text style={styles.bulkBannerTitle}>{t('home.bulk_title')}</Text>
+        <Text style={styles.bulkBannerDesc}>
+          {t('home.bulk_desc')}
+        </Text>
+        <Pressable
+          style={styles.bulkBannerBtn}
+          onPress={() => router.push('/(tabs)/bulk')}
+        >
+          <Text style={styles.bulkBannerBtnText}>{t('home.explore_bulk')}</Text>
+        </Pressable>
+      </Animated.View>
+
+      {/* ===== ADVANCE ORDER BANNER ===== */}
+      <Animated.View style={advanceAnim}>
+      <Pressable style={styles.advanceBanner} onPress={() => router.push('/advance-order')}>
+        <View style={styles.advanceIcon}>
+          <Ionicons name="calendar" size={28} color="#1565C0" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.advanceTitle}>{t('home.advance_order')}</Text>
+          <Text style={styles.advanceDesc}>
+            {t('home.advance_desc')}
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#1565C0" />
+      </Pressable>
+      </Animated.View>
+
+      {/* ===== FEATURED / EDITOR'S PICK ===== */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t('home.editors_pick')}</Text>
+        </View>
+
+        <Animated.View style={featuredAnim}>
+        <Pressable
+          style={styles.featuredCard}
+          onPress={() => router.push(`/product/${featuredProduct.id}`)}
+        >
+          <View style={styles.featuredImg}>
+            <Image
+              source={featuredProduct.image}
+              style={{ width: '60%', height: '80%' }}
+              resizeMode="contain"
+            />
+          </View>
+          <View style={styles.featuredBody}>
+            <Text style={styles.featuredTag}>{featuredProduct.tag || 'ARTISANAL'}</Text>
+            <Text style={styles.featuredName}>{featuredProduct.name}</Text>
+            <Text style={styles.featuredDesc}>{featuredProduct.description}</Text>
+            <View style={styles.featuredFooter}>
+              <Text style={styles.featuredPrice}>
+                ₹{featuredProduct.price}
+                <Text style={styles.featuredUnit}> {featuredProduct.unit}</Text>
+              </Text>
+              <Pressable
+                style={styles.addBtnSmall}
+                onPress={() => handleAddToCart(featuredProduct)}
+              >
+                <Ionicons name="cart-outline" size={20} color={colors.primary} />
+              </Pressable>
+            </View>
+          </View>
+        </Pressable>
+        </Animated.View>
+      </View>
+
+      <View style={{ height: 40 }} />
+    </Animated.ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: glass.screenBg,
+  },
+  // Hero
+  hero: {
+    margin: spacing.base,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(27, 94, 32, 0.85)',
+    minHeight: 280,
+    justifyContent: 'flex-end',
+    borderWidth: 1,
+    borderColor: glass.cardBorder,
+  },
+  heroContent: {
+    padding: spacing['2xl'],
+    paddingTop: 56,
+    zIndex: 2,
+  },
+  heroTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(46, 125, 50, 0.10)',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: radius.full,
+    marginBottom: spacing.base,
+  },
+  heroTagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    color: colors.primaryFixed,
+  },
+  heroTitle: {
+    fontSize: 44,
+    fontWeight: '800',
+    color: colors.white,
+    lineHeight: 46,
+    letterSpacing: -1.2,
+    marginBottom: spacing.md,
+  },
+  heroSub: {
+    color: colors.primaryFixedDim,
+    fontSize: 14,
+    marginBottom: spacing.xl,
+  },
+  heroCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: radius.full,
+    alignSelf: 'flex-start',
+  },
+  heroCtaText: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  heroImage: {
+    position: 'absolute',
+    right: -20,
+    top: 10,
+    width: '55%',
+    height: '90%',
+    opacity: 0.9,
+  },
+  // Search
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: glass.inputBg,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    marginHorizontal: spacing.base,
+    marginVertical: spacing.base,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: glass.inputBorder,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: glass.textPrimary,
+  },
+  sortBtn: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(46,125,50,0.06)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  // Filter Chips
+  filterRow: {
+    maxHeight: 44,
+    marginBottom: spacing.base,
+  },
+  filterRowContent: {
+    paddingHorizontal: spacing.lg,
+    gap: 8,
+    alignItems: 'center',
+  },
+  filterChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingVertical: 6, paddingHorizontal: 14,
+    borderRadius: 100,
+    backgroundColor: 'rgba(46,125,50,0.05)',
+    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+  },
+  filterChipActive: {
+    backgroundColor: '#2E7D32',
+    borderColor: 'rgba(46,125,50,0.18)',
+  },
+  filterChipText: {
+    fontSize: 12, fontWeight: '600',
+    color: 'rgba(27,60,18,0.5)',
+  },
+  filterChipTextActive: {
+    color: '#fff',
+  },
+  // Wishlist Heart
+  wishlistHeart: {
+    position: 'absolute', top: 6, right: 6,
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1, shadowRadius: 4, elevation: 2,
+  },
+  // Section
+  section: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing['2xl'],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: glass.textSecondary,
+    letterSpacing: -0.5,
+  },
+  sectionAction: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: glass.accent,
+    letterSpacing: 0.5,
+  },
+  // Harvest Grid
+  harvestGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.base,
+  },
+  harvestCard: {
+    width: CARD_WIDTH,
+    backgroundColor: glass.cardBg,
+    borderRadius: 18,
+    padding: spacing.base,
+    borderWidth: 1,
+    borderColor: glass.cardBorder,
+  },
+  harvestCardImg: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+  },
+  harvestImg: {
+    width: '85%',
+    height: '85%',
+  },
+  freshnessTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(76, 175, 80, 0.15)',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: radius.full,
+    marginBottom: spacing.sm,
+  },
+  freshnessText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: glass.accentBright,
+  },
+  cardRating: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    marginBottom: 2,
+  },
+  cardRatingText: { fontSize: 11, fontWeight: '700', color: '#1B3C12' },
+  cardRatingCount: { fontSize: 10, color: 'rgba(27,60,18,0.35)' },
+  harvestName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: glass.textPrimary,
+    marginBottom: 2,
+  },
+  harvestOrigin: {
+    fontSize: 11,
+    color: glass.textMuted,
+    marginBottom: spacing.md,
+  },
+  harvestFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  harvestPrice: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: glass.accent,
+  },
+  addBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: glass.btnPrimary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Bulk Banner
+  bulkBanner: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing['2xl'],
+    backgroundColor: 'rgba(20, 66, 18, 0.7)',
+    borderRadius: 22,
+    padding: spacing['2xl'],
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: glass.cardBorderBright,
+  },
+  bulkBannerBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: radius.full,
+    marginBottom: spacing.base,
+  },
+  bulkBannerBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    color: colors.primaryFixed,
+  },
+  bulkBannerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.white,
+    marginBottom: spacing.sm,
+  },
+  bulkBannerDesc: {
+    fontSize: 13,
+    color: colors.primaryFixedDim,
+    marginBottom: spacing.xl,
+    lineHeight: 19,
+  },
+  bulkBannerBtn: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: radius.full,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  bulkBannerBtnText: {
+    color: glass.textPrimary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  // Featured Card
+  featuredCard: {
+    backgroundColor: glass.cardBg,
+    borderRadius: 22,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: glass.cardBorderBright,
+    shadowColor: '#1B5E20',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  featuredImg: {
+    width: '100%',
+    height: 200,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featuredBody: {
+    padding: spacing.xl,
+  },
+  featuredTag: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    color: glass.accentBright,
+    marginBottom: spacing.sm,
+  },
+  featuredName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: glass.textPrimary,
+    marginBottom: spacing.sm,
+    letterSpacing: -0.4,
+  },
+  featuredDesc: {
+    fontSize: 13,
+    color: glass.textMuted,
+    lineHeight: 19,
+    marginBottom: spacing.lg,
+  },
+  featuredFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  featuredPrice: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: glass.accent,
+  },
+  featuredUnit: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: glass.textMuted,
+  },
+  addBtnSmall: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(46, 125, 50, 0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: glass.cardBorder,
+  },
+  // Advance Order Banner
+  advanceBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.xl,
+    padding: spacing.lg,
+    backgroundColor: 'rgba(13, 71, 161, 0.08)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(100, 181, 246, 0.2)',
+  },
+  advanceIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(13, 71, 161, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  advanceTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1565C0',
+    marginBottom: 2,
+  },
+  advanceDesc: {
+    fontSize: 11,
+    color: 'rgba(21, 101, 192, 0.6)',
+    lineHeight: 16,
+  },
+});

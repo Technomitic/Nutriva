@@ -31,7 +31,9 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+.env.production
 
 # typescript
 *.tsbuildinfo
@@ -39,3 +41,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Store credentials — NEVER commit
+play-store-key.json
+google-services.json
+GoogleService-Info.plist
