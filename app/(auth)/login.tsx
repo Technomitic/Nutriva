@@ -15,6 +15,7 @@ import { colors, spacing, radius } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
+import { useDynamic } from '../../src/hooks/useDynamic';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 
@@ -97,6 +98,8 @@ function useCardEntrance() {
 }
 
 export default function LoginScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const signIn = useAuthStore((s) => s.signIn);
   const showToast = useUIStore((s) => s.showToast);
@@ -173,7 +176,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, d.s.screenBg]}>
       {/* Animated Background */}
       <View style={styles.bgLayer}>
         <View style={styles.bgGradientTop} />

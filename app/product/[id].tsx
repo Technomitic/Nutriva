@@ -18,11 +18,14 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
 import { Review, Product } from '../../src/types';
+import { useDynamic } from '../../src/hooks/useDynamic';
 
 const { width: SW } = Dimensions.get('window');
 const IMG_HEIGHT = 320;
 
 export default function ProductDetailScreen() {
+  const d = useDynamic();
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);

@@ -13,8 +13,11 @@ import { colors, spacing, radius } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/authStore';
 import { ChatMessage } from '../../src/types';
 import { supabase } from '../../src/api/supabase';
+import { useDynamic } from '../../src/hooks/useDynamic';
 
 export default function ChatScreen() {
+  const d = useDynamic();
+
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -154,7 +157,7 @@ export default function ChatScreen() {
           <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
         </Pressable>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>Order Chat</Text>
+          <Text style={[styles.headerTitle, d.s.text]}>Order Chat</Text>
           <Text style={styles.headerStatus}>Active</Text>
         </View>
         <View style={styles.headerAvatar}>

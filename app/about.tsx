@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
 import { supabase } from '../src/api/supabase';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 const APP_VERSION = '1.0.0';
 
@@ -92,6 +93,8 @@ const POLICIES: { id: Section; title: string; icon: string; content: string[] }[
 ];
 
 export default function AboutScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<Section>('story');
   const [configData, setConfigData] = useState<Record<string, string>>({});

@@ -16,8 +16,11 @@ import { useAuthStore } from '../src/stores/authStore';
 import { useUIStore } from '../src/stores/uiStore';
 import { supabase } from '../src/api/supabase';
 import { Profile } from '../src/types';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 export default function MyAccountScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const showToast = useUIStore((s) => s.showToast);
@@ -237,13 +240,13 @@ export default function MyAccountScreen() {
     address.trim() !== (user.address || '');
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, d.s.screenBg]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.headerBack} onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)/profile' as any)}>
           <Ionicons name="arrow-back" size={22} color="#1B3C12" />
         </Pressable>
-        <Text style={styles.headerTitle}>My Account</Text>
+        <Text style={[styles.headerTitle, d.s.text]}>My Account</Text>
         <View style={{ width: 40 }} />
       </View>
 

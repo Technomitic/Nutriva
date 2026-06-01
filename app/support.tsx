@@ -15,6 +15,7 @@ import { useAuthStore } from '../src/stores/authStore';
 import { useOrderStore } from '../src/stores/orderStore';
 import { ChatMessage, Order } from '../src/types';
 import { supabase } from '../src/api/supabase';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 type SupportTopic = {
   id: string;
@@ -65,6 +66,8 @@ const TOPICS: SupportTopic[] = [
 type ScreenState = 'topics' | 'pick-order' | 'chat';
 
 export default function SupportScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const orders = useOrderStore((s) => s.orders);
@@ -237,7 +240,7 @@ export default function SupportScreen() {
         <Ionicons name="arrow-back" size={22} color="#1B3C12" />
       </Pressable>
       <View style={styles.headerInfo}>
-        <Text style={styles.headerTitle}>
+        <Text style={[styles.headerTitle, d.s.text]}>
           {screen === 'topics' ? 'Help & Support' :
            screen === 'pick-order' ? 'Select an Order' :
            selectedOrder ? `Order ${selectedOrder.order_number}` :

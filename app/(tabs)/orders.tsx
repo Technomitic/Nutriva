@@ -117,8 +117,8 @@ export default function OrdersScreen() {
     return (
       <View style={[styles.emptyFull, { backgroundColor: d.bg }]}>
         <Ionicons name="receipt-outline" size={64} color={d.textMuted} />
-        <Text style={styles.emptyTitle}>{t('orders.sign_in_desc')}</Text>
-        <Text style={styles.emptyDesc}>{t('orders.no_orders_desc')}</Text>
+        <Text style={[styles.emptyTitle, { color: d.text }]}>{t('orders.sign_in_desc')}</Text>
+        <Text style={[styles.emptyDesc, { color: d.textMuted }]}>{t('orders.no_orders_desc')}</Text>
         <Pressable
           style={styles.signInBtn}
           onPress={() => router.push('/(auth)/login')}
@@ -147,7 +147,7 @@ export default function OrdersScreen() {
       {isLoading && orders.length === 0 && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>{t('orders.loading')}</Text>
+          <Text style={[styles.loadingText, { color: d.textMuted }]}>{t('orders.loading')}</Text>
         </View>
       )}
 
@@ -155,23 +155,23 @@ export default function OrdersScreen() {
       {activeOrder && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('orders.active_order')}</Text>
+            <Text style={[styles.sectionTitle, { color: d.text }]}>{t('orders.active_order')}</Text>
             <View style={[styles.liveBadge, activeOrder.status === 'Cancelled' && styles.liveBadgeCancelled]}>
               <Text style={[styles.liveBadgeText, activeOrder.status === 'Cancelled' && styles.liveBadgeTextCancelled]}>{activeOrder.status.toUpperCase()}</Text>
             </View>
           </View>
 
           <Pressable onPress={() => router.push(`/order/${activeOrder.id}`)}>
-          <View style={styles.trackingCard}>
+          <View style={[styles.trackingCard, { backgroundColor: d.cardBg, borderColor: d.border }]}>
             <View style={styles.trackingTop}>
               <View>
-                <Text style={styles.orderId}>{t('orders.order')} {activeOrder.order_number}</Text>
-                <Text style={styles.orderAmount}>₹{activeOrder.total?.toLocaleString()}</Text>
+                <Text style={[styles.orderId, { color: d.text }]}>{t('orders.order')} {activeOrder.order_number}</Text>
+                <Text style={[styles.orderAmount, { color: d.textMuted }]}>₹{activeOrder.total?.toLocaleString()}</Text>
               </View>
               <View style={{ alignItems: 'flex-end', gap: 8 }}>
                 <View style={styles.orderDate}>
                   <Ionicons name="time-outline" size={14} color={colors.outline} />
-                  <Text style={styles.orderDateText}>
+                  <Text style={[styles.orderDateText, { color: d.textMuted }]}>
                     {new Date(activeOrder.created_at).toLocaleDateString('en-IN', {
                       day: 'numeric', month: 'short',
                     })}
@@ -200,7 +200,7 @@ export default function OrdersScreen() {
 
             {/* Items summary */}
             {activeOrder.items_summary && (
-              <Text style={styles.itemsSummary}>{activeOrder.items_summary}</Text>
+              <Text style={[styles.itemsSummary, { color: d.textMuted, borderBottomColor: d.border }]}>{activeOrder.items_summary}</Text>
             )}
 
             {/* Vertical Tracking */}
@@ -249,17 +249,17 @@ export default function OrdersScreen() {
       {pendingOrders.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('orders.pending')}</Text>
+            <Text style={[styles.sectionTitle, { color: d.text }]}>{t('orders.pending')}</Text>
           </View>
           {pendingOrders.map((order) => (
             <Pressable key={order.id} onPress={() => router.push(`/order/${order.id}`)}>
-            <View style={styles.orderItem}>
-              <View style={[styles.orderIcon, styles.orderIconPending]}>
+            <View style={[styles.orderItem, { borderBottomColor: d.border }]}>
+              <View style={[styles.orderIcon, { backgroundColor: d.cardBg }]}>
                 <Ionicons name="time" size={20} color={colors.warning} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.orderItemId}>{t('orders.order')} {order.order_number}</Text>
-                <Text style={styles.orderItemStatus}>{order.status}</Text>
+                <Text style={[styles.orderItemId, { color: d.text }]}>{t('orders.order')} {order.order_number}</Text>
+                <Text style={[styles.orderItemStatus, { color: d.textMuted }]}>{order.status}</Text>
               </View>
               <Pressable
                 style={styles.chatBtnSmall}
@@ -277,8 +277,8 @@ export default function OrdersScreen() {
                   <View style={styles.chatBadgeSmall} />
                 )}
               </Pressable>
-              <Text style={styles.orderItemAmount}>₹{order.total?.toLocaleString()}</Text>
-              <Ionicons name="chevron-forward" size={16} color={colors.outline} />
+              <Text style={[styles.orderItemAmount, { color: d.accent }]}>₹{order.total?.toLocaleString()}</Text>
+              <Ionicons name="chevron-forward" size={16} color={d.textMuted} />
             </View>
             </Pressable>
           ))}
@@ -288,19 +288,19 @@ export default function OrdersScreen() {
       {/* Past / History */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('orders.recent')}</Text>
+          <Text style={[styles.sectionTitle, { color: d.text }]}>{t('orders.recent')}</Text>
         </View>
 
         {!isLoading && orders.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="receipt-outline" size={48} color={colors.outline} />
-            <Text style={styles.emptyTitle}>{t('orders.no_orders')}</Text>
-            <Text style={styles.emptyDesc}>{t('orders.no_orders_desc')}</Text>
+            <Text style={[styles.emptyTitle, { color: d.text }]}>{t('orders.no_orders')}</Text>
+            <Text style={[styles.emptyDesc, { color: d.textMuted }]}>{t('orders.no_orders_desc')}</Text>
           </View>
         ) : (
           orders.map((order) => (
             <Pressable key={order.id} onPress={() => router.push(`/order/${order.id}`)}>
-            <View style={styles.orderItem}>
+            <View style={[styles.orderItem, { borderBottomColor: d.border }]}>
               <View
                 style={[
                   styles.orderIcon,
@@ -318,14 +318,14 @@ export default function OrdersScreen() {
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.orderItemId}>{t('orders.order')} {order.order_number}</Text>
-                <Text style={styles.orderItemStatus}>
+                <Text style={[styles.orderItemId, { color: d.text }]}>{t('orders.order')} {order.order_number}</Text>
+                <Text style={[styles.orderItemStatus, { color: d.textMuted }]}>
                   {order.status} · {new Date(order.created_at).toLocaleDateString('en-IN', {
                     day: 'numeric', month: 'short', year: 'numeric',
                   })}
                 </Text>
               </View>
-              <Text style={styles.orderItemAmount}>₹{order.total?.toLocaleString()}</Text>
+              <Text style={[styles.orderItemAmount, { color: d.accent }]}>₹{order.total?.toLocaleString()}</Text>
               {order.status === 'Delivered' && (
                 <Pressable
                   style={styles.buyAgainBtn}
@@ -351,20 +351,20 @@ export default function OrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7F5' },
+  container: { flex: 1 },
   header: { padding: spacing['2xl'], paddingBottom: spacing.xl },
-  headerTitle: { fontSize: 32, fontWeight: '700', letterSpacing: -0.8, marginBottom: 4, color: '#1B3C12' },
-  headerSub: { fontSize: 14, color: 'rgba(27, 60, 18, 0.5)' },
+  headerTitle: { fontSize: 32, fontWeight: '700', letterSpacing: -0.8, marginBottom: 4 },
+  headerSub: { fontSize: 14 },
   // Loading
   loadingContainer: { alignItems: 'center', paddingVertical: spacing['4xl'] },
-  loadingText: { fontSize: 14, color: 'rgba(27, 60, 18, 0.5)', marginTop: spacing.base },
+  loadingText: { fontSize: 14, marginTop: spacing.base },
   // Section
   section: { paddingHorizontal: spacing.lg, marginBottom: spacing['2xl'] },
   sectionHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     marginBottom: spacing.lg,
   },
-  sectionTitle: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5, color: '#1B3C12' },
+  sectionTitle: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5 },
   liveBadge: {
     backgroundColor: 'rgba(76, 175, 80, 0.2)', paddingVertical: 4, paddingHorizontal: 10,
     borderRadius: radius.full, borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)',
@@ -383,10 +383,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     marginBottom: spacing.base,
   },
-  orderId: { fontSize: 16, fontWeight: '700', color: '#2E4A26' },
-  orderAmount: { fontSize: 14, color: 'rgba(27, 60, 18, 0.5)', marginTop: 2 },
+  orderId: { fontSize: 16, fontWeight: '700' },
+  orderAmount: { fontSize: 14, marginTop: 2 },
   orderDate: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  orderDateText: { fontSize: 12, color: 'rgba(27, 60, 18, 0.5)' },
+  orderDateText: { fontSize: 12 },
   itemsSummary: {
     fontSize: 13, color: 'rgba(27, 60, 18, 0.55)', lineHeight: 18,
     marginBottom: spacing.lg, paddingBottom: spacing.base,
@@ -405,13 +405,13 @@ const styles = StyleSheet.create({
   trackingDotActive: { backgroundColor: '#2E7D32', borderColor: '#2E7D32' },
   trackingLine: { width: 2, height: 28, backgroundColor: 'rgba(46, 125, 50, 0.06)' },
   trackingLineDone: { backgroundColor: '#43A047' },
-  trackingLabel: { fontSize: 13, color: 'rgba(27, 60, 18, 0.35)', paddingTop: 0 },
-  trackingLabelActive: { color: '#2E4A26', fontWeight: '600' },
+  trackingLabel: { fontSize: 13, color: 'rgba(150, 170, 150, 0.6)', paddingTop: 0 },
+  trackingLabelActive: { fontWeight: '600' },
   // Orders list
   empty: { alignItems: 'center', paddingVertical: spacing['4xl'] },
-  emptyFull: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing['2xl'], backgroundColor: '#F5F7F5' },
-  emptyTitle: { fontSize: 18, fontWeight: '700', marginTop: spacing.base, color: '#1B3C12' },
-  emptyDesc: { fontSize: 13, color: 'rgba(27, 60, 18, 0.5)', marginTop: 4 },
+  emptyFull: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing['2xl'] },
+  emptyTitle: { fontSize: 18, fontWeight: '700', marginTop: spacing.base },
+  emptyDesc: { fontSize: 13, marginTop: 4 },
   signInBtn: {
     backgroundColor: '#2E7D32', paddingVertical: 14, paddingHorizontal: 24,
     borderRadius: radius.full, marginTop: spacing.xl,
@@ -430,9 +430,9 @@ const styles = StyleSheet.create({
   orderIconSuccess: { backgroundColor: 'rgba(46, 125, 50, 0.08)' },
   orderIconPending: { backgroundColor: 'rgba(245, 124, 0, 0.08)' },
   orderIconCancelled: { backgroundColor: 'rgba(198, 40, 40, 0.08)' },
-  orderItemId: { fontSize: 14, fontWeight: '600', color: '#2E4A26' },
-  orderItemStatus: { fontSize: 12, color: 'rgba(27, 60, 18, 0.5)', marginTop: 2 },
-  orderItemAmount: { fontSize: 15, fontWeight: '700', color: '#2E7D32' },
+  orderItemId: { fontSize: 14, fontWeight: '600' },
+  orderItemStatus: { fontSize: 12, marginTop: 2 },
+  orderItemAmount: { fontSize: 15, fontWeight: '700' },
   // Chat button
   chatBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,

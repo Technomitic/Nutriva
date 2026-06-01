@@ -15,6 +15,7 @@ import { useAuthStore } from '../src/stores/authStore';
 import { useUIStore } from '../src/stores/uiStore';
 import { supabase } from '../src/api/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 const PREFS_KEY = 'fresh-notif-prefs';
 
@@ -62,6 +63,8 @@ const ICON_CONFIG: Record<string, { icon: string; color: string; bg: string }> =
 type ViewMode = 'notifications' | 'preferences';
 
 export default function NotificationsScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const showToast = useUIStore((s) => s.showToast);

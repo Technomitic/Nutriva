@@ -17,6 +17,7 @@ import { useOrderStore } from '../src/stores/orderStore';
 import { useUIStore } from '../src/stores/uiStore';
 import { Product } from '../src/types';
 import { supabase } from '../src/api/supabase';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 const { width: SW } = Dimensions.get('window');
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -31,6 +32,8 @@ const SLOTS = [
 type Step = 'date' | 'products' | 'review';
 
 export default function AdvanceOrderScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const placeOrder = useOrderStore((s) => s.placeOrder);

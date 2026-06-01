@@ -15,8 +15,11 @@ import { useWishlistStore } from '../src/stores/wishlistStore';
 import { useCartStore } from '../src/stores/cartStore';
 import { useUIStore } from '../src/stores/uiStore';
 import { products as localProducts } from '../src/data/products';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 export default function WishlistScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const { items: wishlistIds, loadWishlist, toggleWishlist } = useWishlistStore();

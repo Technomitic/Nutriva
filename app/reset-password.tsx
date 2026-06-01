@@ -13,8 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
 import { supabase } from '../src/api/supabase';
 import { useUIStore } from '../src/stores/uiStore';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 export default function ResetPasswordScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const showToast = useUIStore((s) => s.showToast);
   const [password, setPassword] = useState('');

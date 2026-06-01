@@ -17,8 +17,11 @@ import { useCartStore } from '../../src/stores/cartStore';
 import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
 import { products as localProducts } from '../../src/data/products';
+import { useDynamic } from '../../src/hooks/useDynamic';
 
 export default function OrderDetailScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const user = useAuthStore((s) => s.user);
@@ -182,15 +185,15 @@ export default function OrderDetailScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, d.s.screenBg]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.headerBack} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#1B3C12" />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Order {order.order_number}</Text>
-          <Text style={styles.headerSub}>
+          <Text style={[styles.headerTitle, d.s.text]}>Order {order.order_number}</Text>
+          <Text style={[styles.headerSub, d.s.textMuted]}>
             {new Date(order.created_at).toLocaleDateString('en-IN', {
               day: 'numeric', month: 'long', year: 'numeric',
             })}
@@ -241,7 +244,7 @@ export default function OrderDetailScreen() {
         </View>
 
         {/* Products */}
-        <Text style={styles.sectionTitle}>
+        <Text style={[styles.sectionTitle, d.s.text]}>
           Products ({items.length} item{items.length !== 1 ? 's' : ''})
         </Text>
 
@@ -286,7 +289,7 @@ export default function OrderDetailScreen() {
         </View>
 
         {/* Tracking */}
-        <Text style={styles.sectionTitle}>Order Tracking</Text>
+        <Text style={[styles.sectionTitle, d.s.text]}>Order Tracking</Text>
 
         {isCancelled ? (
           <View style={styles.cancelledCard}>

@@ -67,7 +67,7 @@ export default function BulkScreen() {
       {/* Bulk Deals */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('bulk.bulk_packs')}</Text>
+          <Text style={[styles.sectionTitle, { color: d.text }]}>{t('bulk.bulk_packs')}</Text>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{t('bulk.save_big')}</Text>
           </View>
@@ -75,12 +75,12 @@ export default function BulkScreen() {
 
         {bulkDeals.map((deal, idx) => (
           <Animated.View key={deal.id} style={[dealAnims[idx] || {}]}>
-          <View style={styles.dealCard}>
+          <View style={[styles.dealCard, { backgroundColor: d.cardBg, borderColor: d.border }]}>
             <View style={styles.dealHeader}>
               <Image source={deal.image} style={styles.dealImg} resizeMode="contain" />
               <View style={{ flex: 1 }}>
-                <Text style={styles.dealName}>{deal.name}</Text>
-                <Text style={styles.dealDesc}>{deal.desc}</Text>
+                <Text style={[styles.dealName, { color: d.text }]}>{deal.name}</Text>
+                <Text style={[styles.dealDesc, { color: d.textMuted }]}>{deal.desc}</Text>
               </View>
             </View>
             <View style={styles.tiers}>
@@ -93,10 +93,10 @@ export default function BulkScreen() {
                   ]}
                   onPress={() => handleSelectTier(deal.id, i)}
                 >
-                  <Text style={styles.tierQty}>{tier.qty}</Text>
+                  <Text style={[styles.tierQty, { color: d.text }]}>{tier.qty}</Text>
                   <View style={styles.tierPrices}>
-                    <Text style={styles.tierOriginal}>₹{tier.original}</Text>
-                    <Text style={styles.tierPrice}>₹{tier.price}</Text>
+                    <Text style={[styles.tierOriginal, { color: d.textDim }]}>₹{tier.original}</Text>
+                    <Text style={[styles.tierPrice, { color: d.accent }]}>₹{tier.price}</Text>
                     <Text style={styles.tierSave}>{tier.save}</Text>
                   </View>
                 </Pressable>
@@ -113,7 +113,7 @@ export default function BulkScreen() {
       {/* Festival Packs */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('bulk.festival_packs')}</Text>
+          <Text style={[styles.sectionTitle, { color: d.text }]}>{t('bulk.festival_packs')}</Text>
           <View style={[styles.badge, { backgroundColor: colors.secondaryContainer }]}>
             <Text style={[styles.badgeText, { color: colors.primary }]}>{t('bulk.popular')}</Text>
           </View>
@@ -121,14 +121,14 @@ export default function BulkScreen() {
 
         {festivalPacks.map((pack, idx) => (
           <Animated.View key={pack.id} style={[packAnims[idx] || {}]}>
-          <View style={styles.festivalCard}>
-            <Text style={styles.festivalName}>{pack.name}</Text>
-            <Text style={styles.festivalDesc}>{pack.desc}</Text>
+          <View style={[styles.festivalCard, { backgroundColor: d.cardBg, borderColor: d.border }]}>
+            <Text style={[styles.festivalName, { color: d.text }]}>{pack.name}</Text>
+            <Text style={[styles.festivalDesc, { color: d.textMuted }]}>{pack.desc}</Text>
             <View style={styles.festivalItems}>
               {pack.items.map((item) => (
                 <View key={item.name} style={styles.festivalItem}>
-                  <Ionicons name="checkmark-circle" size={16} color={colors.secondary} />
-                  <Text style={styles.festivalItemText}>
+                  <Ionicons name="checkmark-circle" size={16} color={d.accent} />
+                  <Text style={[styles.festivalItemText, { color: d.textSecondary }]}>
                     {item.name} — {item.qty}
                   </Text>
                 </View>
@@ -136,8 +136,8 @@ export default function BulkScreen() {
             </View>
             <View style={styles.festivalFooter}>
               <View>
-                <Text style={styles.festivalPrice}>₹{pack.price.toLocaleString()}</Text>
-                <Text style={styles.festivalOriginal}>₹{pack.original.toLocaleString()}</Text>
+                <Text style={[styles.festivalPrice, { color: d.accent }]}>₹{pack.price.toLocaleString()}</Text>
+                <Text style={[styles.festivalOriginal, { color: d.textDim }]}>₹{pack.original.toLocaleString()}</Text>
               </View>
               <Pressable style={styles.packBtn} onPress={() => handleAddPack(pack.id)}>
                 <Text style={styles.packBtnText}>{t('bulk.add_pack')}</Text>

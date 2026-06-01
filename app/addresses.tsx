@@ -14,6 +14,7 @@ import { colors, spacing, radius } from '../src/theme';
 import { useAuthStore } from '../src/stores/authStore';
 import { useUIStore } from '../src/stores/uiStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDynamic } from '../src/hooks/useDynamic';
 
 const STORAGE_KEY = 'fresh-addresses';
 
@@ -25,6 +26,8 @@ interface SavedAddress {
 }
 
 export default function AddressesScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const showToast = useUIStore((s) => s.showToast);
@@ -103,13 +106,13 @@ export default function AddressesScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, d.s.screenBg]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#1B3C12" />
         </Pressable>
-        <Text style={styles.headerTitle}>Saved Addresses</Text>
+        <Text style={[styles.headerTitle, d.s.text]}>Saved Addresses</Text>
         <Pressable
           style={styles.addHeaderBtn}
           onPress={() => setShowForm(!showForm)}
@@ -154,8 +157,8 @@ export default function AddressesScreen() {
         {addresses.length === 0 && !showForm ? (
           <View style={styles.empty}>
             <Ionicons name="location-outline" size={56} color="rgba(27, 60, 18, 0.25)" />
-            <Text style={styles.emptyTitle}>No saved addresses</Text>
-            <Text style={styles.emptyDesc}>
+            <Text style={[styles.emptyTitle, d.s.text]}>No saved addresses</Text>
+            <Text style={[styles.emptyDesc, d.s.textMuted]}>
               Add your delivery addresses for faster checkout
             </Text>
             <Pressable style={styles.addBtn} onPress={() => setShowForm(true)}>

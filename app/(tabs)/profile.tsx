@@ -101,10 +101,10 @@ export default function ProfileScreen() {
 
   if (!isAuthenticated || !user) {
     return (
-      <View style={styles.emptyContainer}>
-        <Ionicons name="person-circle-outline" size={64} color={colors.outline} />
-        <Text style={styles.emptyTitle}>{t('profile.sign_in_desc')}</Text>
-        <Text style={styles.emptyDesc}>{t('profile.sign_in_sub')}</Text>
+      <View style={[styles.emptyContainer, { backgroundColor: d.bg }]}>
+        <Ionicons name="person-circle-outline" size={64} color={d.textMuted} />
+        <Text style={[styles.emptyTitle, { color: d.text }]}>{t('profile.sign_in_desc')}</Text>
+        <Text style={[styles.emptyDesc, { color: d.textMuted }]}>{t('profile.sign_in_sub')}</Text>
         <Pressable
           style={styles.primaryBtn}
           onPress={() => router.push('/(auth)/login')}
@@ -278,7 +278,7 @@ export default function ProfileScreen() {
             style={styles.menuItem}
             onPress={() => handleMenuPress(item)}
           >
-            <Ionicons name={item.icon} size={22} color="rgba(27, 60, 18, 0.4)" />
+            <Ionicons name={item.icon} size={22} color={d.textMuted} />
             <Text style={[styles.menuLabel, { color: menuTextColor }]}>{t(item.labelKey)}</Text>
             {item.labelKey === 'profile.notifications' && unreadNotifCount > 0 && (
               <View style={styles.notifBadge}>
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16, borderBottomWidth: 1,
     borderBottomColor: 'rgba(46, 125, 50, 0.06)',
   },
-  menuLabel: { flex: 1, fontSize: 15, fontWeight: '500', color: '#2E4A26' },
+  menuLabel: { flex: 1, fontSize: 15, fontWeight: '500' },
   menuItemAdmin: { borderBottomColor: 'rgba(129, 199, 132, 0.2)' },
   menuItemLogout: { borderBottomWidth: 0, marginTop: spacing.base },
   newBadge: {
@@ -368,9 +368,9 @@ const styles = StyleSheet.create({
   },
   newBadgeText: { fontSize: 8, fontWeight: '700', color: '#43A047', letterSpacing: 0.5 },
   // Empty
-  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing['2xl'], backgroundColor: '#F5F7F5' },
-  emptyTitle: { fontSize: 20, fontWeight: '700', marginTop: spacing.lg, color: '#1B3C12' },
-  emptyDesc: { fontSize: 14, color: 'rgba(27, 60, 18, 0.5)', marginTop: 4, marginBottom: spacing.xl },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing['2xl'] },
+  emptyTitle: { fontSize: 20, fontWeight: '700', marginTop: spacing.lg },
+  emptyDesc: { fontSize: 14, marginTop: 4, marginBottom: spacing.xl },
   primaryBtn: {
     backgroundColor: '#2E7D32', paddingVertical: 14, paddingHorizontal: 24,
     borderRadius: radius.full, borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)',

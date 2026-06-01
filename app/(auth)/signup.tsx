@@ -15,6 +15,7 @@ import { colors, spacing, radius } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
+import { useDynamic } from '../../src/hooks/useDynamic';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 const FRUITS = ['🍎', '🍊', '🍋', '🍇', '🍓', '🥭', '🍑', '🍌', '🫐', '🍒', '🥝', '🍍'];
@@ -71,6 +72,8 @@ function useCardEntrance() {
 }
 
 export default function SignupScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const signUp = useAuthStore((s) => s.signUp);
   const showToast = useUIStore((s) => s.showToast);
@@ -150,7 +153,7 @@ export default function SignupScreen() {
   // ── Email confirmation success card ──
   if (confirmationSent) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, d.s.screenBg]}>
         <View style={styles.bgLayer}>
           <View style={styles.bgGradientTop} />
           <View style={styles.bgGradientBottom} />
