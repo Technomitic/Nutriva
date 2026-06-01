@@ -304,7 +304,7 @@ export default function HomeScreen() {
             onPress={(e) => { e.stopPropagation?.(); handleAddToCart(heroProduct); }}
           >
             <Ionicons name="add" size={18} color={colors.primary} />
-            <Text style={styles.heroCtaText}>{t('home.add_to_cart')} — ₹{heroProduct.price}</Text>
+            <Text style={styles.heroCtaText}>{t('home.add_to_cart')} — ₹{heroProduct.price}{heroProduct.unit}</Text>
           </Pressable>
         </View>
         {heroProduct.image ? (
@@ -427,7 +427,7 @@ export default function HomeScreen() {
                 {product.origin.split('·')[1]?.trim() || product.origin}
               </Text>
               <View style={styles.harvestFooter}>
-                <Text style={[styles.harvestPrice, { color: d.accent }]}>₹{product.price}</Text>
+                <Text style={[styles.harvestPrice, { color: d.accent }]}>₹{product.price}<Text style={[styles.harvestUnit, { color: d.textMuted }]}>{product.unit}</Text></Text>
                 <Pressable
                   style={styles.addBtn}
                   onPress={(e) => {
@@ -755,6 +755,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: glass.accent,
+  },
+  harvestUnit: {
+    fontSize: 11,
+    fontWeight: '500',
   },
   addBtn: {
     width: 32,

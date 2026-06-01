@@ -2,7 +2,7 @@
  * Fresh — Cart / Basket Screen
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Image, TextInput, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,13 +22,18 @@ export default function CartScreen() {
   const showToast = useUIStore((s) => s.showToast);
   const user = useAuthStore((s) => s.user);
   const placeOrder = useOrderStore((s) => s.placeOrder);
-  const { appliedCoupon, discount, error: couponError, isValidating, applyCoupon, removeCoupon, recordRedemption } = useCouponStore();
+  const { appliedCoupon, discount, error: couponError, isValidating, applyCoupon, removeCoupon, recalculateDiscount, recordRedemption } = useCouponStore();
   const total = getTotal();
   const finalTotal = Math.max(0, total - discount);
   const count = getItemCount();
   const [placing, setPlacing] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoExpanded, setPromoExpanded] = useState(false);
+
+  // Keep discount in sync whenever the cart subtotal changes
+  useEffect(() => {
+    recalculateDiscount(total);
+  }, [total]);
 
   // Animations
   const headerAnim = useHeroEntrance();
