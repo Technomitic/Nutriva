@@ -60,7 +60,7 @@ export default function HomeScreen() {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.image || (product.image_url ? { uri: product.image_url } : null),
       variety: product.variety,
       unit: product.unit,
     });
@@ -149,7 +149,7 @@ export default function HomeScreen() {
       if (hero) setHeroId(hero.id);
       if (pick) setEditorsPickId(pick.id);
     });
-  }, []);
+  }, [refreshing]);
 
   // Fetch product ratings
   useEffect(() => {
@@ -170,8 +170,15 @@ export default function HomeScreen() {
     });
   }, []);
 
-  const heroProduct = products.find((p) => p.id === heroId) || products[0];
-  const featuredProduct = products.find((p) => p.id === editorsPickId) || products.find((p) => p.id === 'apple')!;
+  // Look up hero/featured from Supabase data first, then static fallback
+  const heroProduct = supabaseProducts.find((p) => p.id === heroId)
+    || products.find((p) => p.id === heroId)
+    || supabaseProducts[0]
+    || products[0];
+  const featuredProduct = supabaseProducts.find((p) => p.id === editorsPickId)
+    || products.find((p) => p.id === editorsPickId)
+    || supabaseProducts[1]
+    || products.find((p) => p.id === 'apple')!;
 
   // ── Animations ──
   const heroAnim = useHeroEntrance();
@@ -193,6 +200,7 @@ export default function HomeScreen() {
       }
     >
       {/* ===== HERO ===== */}
+      <Pressable onPress={() => router.push(`/product/${heroProduct.id}`)}>
       <Animated.View style={[styles.hero, heroAnim]}>
         <View style={styles.heroContent}>
           <View style={styles.heroTag}>
@@ -202,18 +210,31 @@ export default function HomeScreen() {
           <Text style={styles.heroSub}>{heroProduct.origin}</Text>
           <Pressable
             style={styles.heroCta}
-            onPress={() => handleAddToCart(heroProduct)}
+            onPress={(e) => { e.stopPropagation?.(); handleAddToCart(heroProduct); }}
           >
             <Ionicons name="add" size={18} color={colors.primary} />
             <Text style={styles.heroCtaText}>{t('home.add_to_cart')} — ₹{heroProduct.price}</Text>
           </Pressable>
         </View>
-        <Animated.Image
-          source={heroProduct.image}
-          style={[styles.heroImage, heroFloat]}
-          resizeMode="contain"
-        />
+        {heroProduct.image ? (
+          <Animated.Image
+            source={heroProduct.image}
+            style={[styles.heroImage, heroFloat]}
+            resizeMode="contain"
+          />
+        ) : heroProduct.image_url ? (
+          <Animated.Image
+            source={{ uri: heroProduct.image_url }}
+            style={[styles.heroImage, heroFloat]}
+            resizeMode="contain"
+          />
+        ) : (
+          <Animated.View style={[styles.heroImage, heroFloat, { alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(46,125,50,0.08)', borderRadius: 80 }]}>
+            <Ionicons name="leaf-outline" size={60} color="rgba(46,125,50,0.2)" />
+          </Animated.View>
+        )}
       </Animated.View>
+      </Pressable>
 
       {/* ===== SEARCH ===== */}
       <View style={[styles.searchBar, { backgroundColor: d.inputBg, borderColor: d.inputBorder }]}>
@@ -385,11 +406,23 @@ export default function HomeScreen() {
           onPress={() => router.push(`/product/${featuredProduct.id}`)}
         >
           <View style={styles.featuredImg}>
-            <Image
-              source={featuredProduct.image}
-              style={{ width: '60%', height: '80%' }}
-              resizeMode="contain"
-            />
+            {featuredProduct.image ? (
+              <Image
+                source={featuredProduct.image}
+                style={{ width: '60%', height: '80%' }}
+                resizeMode="contain"
+              />
+            ) : featuredProduct.image_url ? (
+              <Image
+                source={{ uri: featuredProduct.image_url }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={{ width: '60%', height: '80%', alignItems: 'center', justifyContent: 'center' }}>
+                <Ionicons name="leaf-outline" size={60} color="rgba(46,125,50,0.2)" />
+              </View>
+            )}
           </View>
           <View style={styles.featuredBody}>
             <Text style={styles.featuredTag}>{featuredProduct.tag || 'ARTISANAL'}</Text>
