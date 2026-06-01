@@ -5,7 +5,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import {
-  View, Text, ScrollView, Pressable, Image,
+  View, Text, ScrollView, Pressable, Image, FlatList,
   TextInput, StyleSheet, RefreshControl, Dimensions, Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -27,6 +27,97 @@ import {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (Math.min(SCREEN_WIDTH, 430) - spacing.lg * 2 - spacing.base) / 2;
+
+/* ── Mini Image Slider for Product Cards ── */
+function CardImageSlider({ product }: { product: Product }) {
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  // Build image list: local asset → image_url → image_urls (deduplicated)
+  const images: { key: string; local?: any; uri?: string }[] = [];
+  const seen = new Set<string>();
+
+  if (product.image) {
+    images.push({ key: 'local', local: product.image });
+  }
+  if (product.image_url) {
+    seen.add(product.image_url);
+    images.push({ key: product.image_url, uri: product.image_url });
+  }
+  if (product.image_urls?.length) {
+    product.image_urls.forEach((url) => {
+      if (!seen.has(url)) {
+        seen.add(url);
+        images.push({ key: url, uri: url });
+      }
+    });
+  }
+
+  // Fallback: single placeholder
+  if (images.length === 0) {
+    images.push({ key: 'placeholder' });
+  }
+
+  // If only 1 image, render statically (no slider)
+  if (images.length === 1) {
+    const img = images[0];
+    return (
+      <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        {img.local ? (
+          <Image source={img.local} style={styles.harvestImg} resizeMode="contain" />
+        ) : img.uri ? (
+          <Image source={{ uri: img.uri }} style={styles.harvestImg} resizeMode="contain" />
+        ) : (
+          <View style={{ width: '85%', height: '85%', borderRadius: 12, backgroundColor: 'rgba(46,125,50,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="leaf-outline" size={40} color="rgba(46,125,50,0.2)" />
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  // Multi-image slider
+  const imgSize = CARD_WIDTH - spacing.base * 2;
+  return (
+    <View style={{ width: '100%', height: '100%' }}>
+      <FlatList
+        data={images}
+        keyExtractor={(item) => item.key}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={(e) => {
+          const idx = Math.round(e.nativeEvent.contentOffset.x / imgSize);
+          if (idx !== activeIdx) setActiveIdx(idx);
+        }}
+        scrollEventThrottle={16}
+        getItemLayout={(_, index) => ({ length: imgSize, offset: imgSize * index, index })}
+        renderItem={({ item }) => (
+          <View style={{ width: imgSize, height: imgSize, alignItems: 'center', justifyContent: 'center' }}>
+            {item.local ? (
+              <Image source={item.local} style={styles.harvestImg} resizeMode="contain" />
+            ) : item.uri ? (
+              <Image source={{ uri: item.uri }} style={styles.harvestImg} resizeMode="contain" />
+            ) : null}
+          </View>
+        )}
+      />
+      {/* Dot indicators */}
+      <View style={{ position: 'absolute', bottom: 4, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 4 }}>
+        {images.map((_, i) => (
+          <View
+            key={i}
+            style={{
+              width: activeIdx === i ? 12 : 5,
+              height: 5,
+              borderRadius: 3,
+              backgroundColor: activeIdx === i ? '#2E7D32' : 'rgba(46,125,50,0.2)',
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -302,22 +393,7 @@ export default function HomeScreen() {
               onPress={() => router.push(`/product/${product.id}`)}
             >
               <View style={styles.harvestCardImg}>
-                {product.image ? (
-                  <Image source={product.image} style={styles.harvestImg} resizeMode="contain" />
-                ) : product.image_url ? (
-                  <Image source={{ uri: product.image_url }} style={styles.harvestImg} resizeMode="contain" />
-                ) : (
-                  <View style={{ width: '85%', height: '85%', borderRadius: 12, backgroundColor: 'rgba(46,125,50,0.08)', alignItems: 'center', justifyContent: 'center' }}>
-                    <Ionicons name="leaf-outline" size={40} color="rgba(46,125,50,0.2)" />
-                  </View>
-                )}
-                {/* Multi-image badge */}
-                {((product.image_urls?.length || 0) + (product.image_url ? 1 : 0)) > 1 && (
-                  <View style={{ position: 'absolute', bottom: 6, left: 6, flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(0,0,0,0.5)', paddingVertical: 2, paddingHorizontal: 6, borderRadius: 10 }}>
-                    <Ionicons name="images-outline" size={10} color="#fff" />
-                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#fff' }}>{(product.image_urls?.length || 0) + (product.image_url ? 1 : 0)}</Text>
-                  </View>
-                )}
+                <CardImageSlider product={product} />
                 {user && (
                   <Pressable
                     style={styles.wishlistHeart}
