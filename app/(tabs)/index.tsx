@@ -415,8 +415,8 @@ export default function HomeScreen() {
             ) : featuredProduct.image_url ? (
               <Image
                 source={{ uri: featuredProduct.image_url }}
-                style={{ width: '100%', height: '100%' }}
-                resizeMode="cover"
+                style={{ width: '100%', height: '100%', borderRadius: 12 }}
+                resizeMode="contain"
               />
             ) : (
               <View style={{ width: '60%', height: '80%', alignItems: 'center', justifyContent: 'center' }}>
@@ -747,10 +747,11 @@ const styles = StyleSheet.create({
   },
   featuredImg: {
     width: '100%',
-    height: 200,
+    height: 260,
     backgroundColor: 'rgba(255,255,255,0.05)',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: spacing.base,
   },
   featuredBody: {
     padding: spacing.xl,
