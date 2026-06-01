@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12, fontWeight: '600',
-    color: 'rgba(27,60,18,0.5)',
+    color: glass.textMuted,
   },
   filterChipTextActive: {
     color: '#fff',
@@ -617,8 +617,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 3,
     marginBottom: 2,
   },
-  cardRatingText: { fontSize: 11, fontWeight: '700', color: '#1B3C12' },
-  cardRatingCount: { fontSize: 10, color: 'rgba(27,60,18,0.35)' },
+  cardRatingText: { fontSize: 11, fontWeight: '700', color: glass.textPrimary },
+  cardRatingCount: { fontSize: 10, color: glass.textMuted },
   harvestName: {
     fontSize: 14,
     fontWeight: '600',
