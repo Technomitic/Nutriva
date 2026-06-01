@@ -21,7 +21,7 @@ import { Review, Product } from '../../src/types';
 import { useDynamic } from '../../src/hooks/useDynamic';
 
 const { width: SW } = Dimensions.get('window');
-const IMG_HEIGHT = 320;
+const IMG_HEIGHT = 380;
 
 export default function ProductDetailScreen() {
   const d = useDynamic();
@@ -36,7 +36,7 @@ export default function ProductDetailScreen() {
   // Image slider
   const [allImages, setAllImages] = useState<{ uri: string; isLocal: boolean }[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
-  const sliderRef = useRef<ScrollView>(null);
+  const sliderRef = useRef<FlatList>(null);
 
   // Reviews
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -99,22 +99,27 @@ export default function ProductDetailScreen() {
     if (!product) return;
 
     const images: { uri: string; isLocal: boolean }[] = [];
+    const seen = new Set<string>();
 
     // Add local asset image if available
     if (product.image) {
       images.push({ uri: 'LOCAL', isLocal: true });
     }
 
-    // Add Supabase image_urls
-    if (product.image_urls?.length) {
-      product.image_urls.forEach((url: string) => {
-        images.push({ uri: url, isLocal: false });
-      });
+    // Add the main Supabase image_url
+    if (product.image_url) {
+      seen.add(product.image_url);
+      images.push({ uri: product.image_url, isLocal: false });
     }
 
-    // If no images at all but image_url exists, use it
-    if (images.length === 0 && product.image_url) {
-      images.push({ uri: product.image_url, isLocal: false });
+    // Add additional Supabase image_urls (deduplicated)
+    if (product.image_urls?.length) {
+      product.image_urls.forEach((url: string) => {
+        if (!seen.has(url)) {
+          seen.add(url);
+          images.push({ uri: url, isLocal: false });
+        }
+      });
     }
 
     // If still no images, show a placeholder
@@ -204,7 +209,7 @@ export default function ProductDetailScreen() {
   const handleScroll = (e: any) => {
     const x = e.nativeEvent.contentOffset.x;
     const idx = Math.round(x / SW);
-    setActiveSlide(idx);
+    if (idx !== activeSlide) setActiveSlide(idx);
   };
 
   // Pick review image
@@ -354,16 +359,18 @@ export default function ProductDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ── Image Slider ── */}
         <View style={s.sliderWrap}>
-          <ScrollView
+          <FlatList
             ref={sliderRef}
+            data={allImages}
+            keyExtractor={(_, idx) => idx.toString()}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-          >
-            {allImages.map((img, idx) => (
-              <View key={idx} style={s.slideItem}>
+            getItemLayout={(_, index) => ({ length: SW, offset: SW * index, index })}
+            renderItem={({ item: img }) => (
+              <View style={[s.slideItem, { width: SW }]}>
                 {img.isLocal && img.uri === 'PLACEHOLDER' ? (
                   <View style={{ width: '70%', height: '85%', borderRadius: 12, backgroundColor: 'rgba(46,125,50,0.06)', alignItems: 'center', justifyContent: 'center' }}>
                     <Ionicons name="leaf-outline" size={64} color="rgba(46,125,50,0.15)" />
@@ -371,18 +378,22 @@ export default function ProductDetailScreen() {
                 ) : img.isLocal && product.image ? (
                   <Image source={product.image} style={s.slideImg} resizeMode="contain" />
                 ) : !img.isLocal ? (
-                  <Image source={{ uri: img.uri }} style={s.slideImg} resizeMode="cover" />
+                  <Image source={{ uri: img.uri }} style={s.slideImg} resizeMode="contain" />
                 ) : null}
               </View>
-            ))}
-          </ScrollView>
+            )}
+          />
           {/* Dot indicators */}
           {allImages.length > 1 && (
             <View style={s.dotsRow}>
               {allImages.map((_, idx) => (
-                <View
+                <Pressable
                   key={idx}
                   style={[s.dot, activeSlide === idx && s.dotActive]}
+                  onPress={() => {
+                    sliderRef.current?.scrollToIndex({ index: idx, animated: true });
+                    setActiveSlide(idx);
+                  }}
                 />
               ))}
             </View>
@@ -393,6 +404,35 @@ export default function ProductDetailScreen() {
               <Ionicons name="images-outline" size={12} color="#fff" />
               <Text style={s.imgCountText}>{activeSlide + 1}/{allImages.length}</Text>
             </View>
+          )}
+          {/* Navigation arrows for web */}
+          {Platform.OS === 'web' && allImages.length > 1 && (
+            <>
+              {activeSlide > 0 && (
+                <Pressable
+                  style={[s.sliderArrow, { left: 12 }]}
+                  onPress={() => {
+                    const prev = activeSlide - 1;
+                    sliderRef.current?.scrollToIndex({ index: prev, animated: true });
+                    setActiveSlide(prev);
+                  }}
+                >
+                  <Ionicons name="chevron-back" size={22} color="#fff" />
+                </Pressable>
+              )}
+              {activeSlide < allImages.length - 1 && (
+                <Pressable
+                  style={[s.sliderArrow, { right: 12 }]}
+                  onPress={() => {
+                    const next = activeSlide + 1;
+                    sliderRef.current?.scrollToIndex({ index: next, animated: true });
+                    setActiveSlide(next);
+                  }}
+                >
+                  <Ionicons name="chevron-forward" size={22} color="#fff" />
+                </Pressable>
+              )}
+            </>
           )}
         </View>
 
@@ -579,13 +619,13 @@ const s = StyleSheet.create({
   },
 
   // ── Image Slider ──
-  sliderWrap: { position: 'relative' },
+  sliderWrap: { position: 'relative', overflow: 'hidden' },
   slideItem: {
     width: SW, height: IMG_HEIGHT,
     backgroundColor: 'rgba(46, 125, 50, 0.03)',
     alignItems: 'center', justifyContent: 'center',
   },
-  slideImg: { width: '70%', height: '85%', borderRadius: 12 },
+  slideImg: { width: '90%', height: '90%', borderRadius: 12 },
   dotsRow: {
     flexDirection: 'row', justifyContent: 'center', gap: 6,
     position: 'absolute', bottom: 12, left: 0, right: 0,
@@ -602,6 +642,12 @@ const s = StyleSheet.create({
     borderRadius: 999,
   },
   imgCountText: { fontSize: 11, fontWeight: '600', color: '#fff' },
+  sliderArrow: {
+    position: 'absolute', top: '50%', marginTop: -20,
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center',
+    zIndex: 10,
+  } as any,
 
   // ── Body ──
   body: { padding: spacing.xl },

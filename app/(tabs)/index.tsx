@@ -305,10 +305,17 @@ export default function HomeScreen() {
                 {product.image ? (
                   <Image source={product.image} style={styles.harvestImg} resizeMode="contain" />
                 ) : product.image_url ? (
-                  <Image source={{ uri: product.image_url }} style={styles.harvestImg} resizeMode="cover" />
+                  <Image source={{ uri: product.image_url }} style={styles.harvestImg} resizeMode="contain" />
                 ) : (
                   <View style={{ width: '85%', height: '85%', borderRadius: 12, backgroundColor: 'rgba(46,125,50,0.08)', alignItems: 'center', justifyContent: 'center' }}>
                     <Ionicons name="leaf-outline" size={40} color="rgba(46,125,50,0.2)" />
+                  </View>
+                )}
+                {/* Multi-image badge */}
+                {((product.image_urls?.length || 0) + (product.image_url ? 1 : 0)) > 1 && (
+                  <View style={{ position: 'absolute', bottom: 6, left: 6, flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(0,0,0,0.5)', paddingVertical: 2, paddingHorizontal: 6, borderRadius: 10 }}>
+                    <Ionicons name="images-outline" size={10} color="#fff" />
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#fff' }}>{(product.image_urls?.length || 0) + (product.image_url ? 1 : 0)}</Text>
                   </View>
                 )}
                 {user && (
