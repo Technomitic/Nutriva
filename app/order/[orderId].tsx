@@ -189,7 +189,7 @@ export default function OrderDetailScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.headerBack} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color="#1B3C12" />
+          <Ionicons name="arrow-back" size={22} color={d.text} />
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={[styles.headerTitle, d.s.text]}>Order {order.order_number}</Text>
@@ -262,7 +262,7 @@ export default function OrderDetailScreen() {
                     <Text style={styles.productEmoji}>🍎</Text>
                   </View>
                   <View style={styles.productInfo}>
-                    <Text style={styles.productName}>{item.name}</Text>
+                    <Text style={[styles.productName, { color: d.text }]}>{item.name}</Text>
                     <Text style={styles.productMeta}>
                       ₹{item.price?.toLocaleString()} × {item.qty}
                     </Text>

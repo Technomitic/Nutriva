@@ -49,7 +49,7 @@ export default function WishlistScreen() {
       {/* Header */}
       <View style={st.header}>
         <Pressable style={st.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color="#1B3C12" />
+          <Ionicons name="arrow-back" size={22} color={d.text} />
         </Pressable>
         <Text style={st.headerTitle}>My Wishlist</Text>
         <View style={{ flex: 1 }} />

@@ -199,7 +199,7 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="dark" />
+      <StatusBar style={useThemeStore.getState().isDark ? 'light' : 'dark'} />
       <AuthGuard>
         <Slot />
       </AuthGuard>

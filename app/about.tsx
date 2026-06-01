@@ -135,26 +135,26 @@ export default function AboutScreen() {
   });
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { backgroundColor: d.bg }]}>
       {/* Header */}
       <View style={s.header}>
-        <Pressable style={s.backBtn} onPress={() => router.replace('/(tabs)/profile')}>
-          <Ionicons name="arrow-back" size={22} color="#1B3C12" />
+        <Pressable style={[s.backBtn, { backgroundColor: d.accentLight, borderColor: d.border }]} onPress={() => router.replace('/(tabs)/profile')}>
+          <Ionicons name="arrow-back" size={22} color={d.text} />
         </Pressable>
-        <Text style={s.headerTitle}>About</Text>
-        <Text style={s.headerVersion}>v{APP_VERSION}</Text>
+        <Text style={[s.headerTitle, { color: d.text }]}>About</Text>
+        <Text style={[s.headerVersion, { color: d.textMuted, backgroundColor: d.accentLight, borderColor: d.border }]}>v{APP_VERSION}</Text>
       </View>
 
       {/* Section Tabs */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.tabBar} contentContainerStyle={s.tabBarContent}>
-        <Pressable style={[s.tab, activeSection === 'story' && s.tabActive]} onPress={() => setActiveSection('story')}>
-          <Ionicons name="sparkles" size={14} color={activeSection === 'story' ? '#2E4A26' : 'rgba(27, 60, 18, 0.5)'} />
-          <Text style={[s.tabText, activeSection === 'story' && s.tabTextActive]}>Our Story</Text>
+        <Pressable style={[s.tab, activeSection === 'story' && s.tabActive, activeSection !== 'story' && { backgroundColor: d.accentLight, borderColor: d.border }]} onPress={() => setActiveSection('story')}>
+          <Ionicons name="sparkles" size={14} color={activeSection === 'story' ? '#fff' : d.textMuted} />
+          <Text style={[s.tabText, activeSection === 'story' && s.tabTextActive, activeSection !== 'story' && { color: d.textMuted }]}>Our Story</Text>
         </Pressable>
         {POLICIES.map((p) => (
-          <Pressable key={p.id} style={[s.tab, activeSection === p.id && s.tabActive]} onPress={() => setActiveSection(p.id)}>
-            <Ionicons name={p.icon as any} size={14} color={activeSection === p.id ? '#2E4A26' : 'rgba(27, 60, 18, 0.5)'} />
-            <Text style={[s.tabText, activeSection === p.id && s.tabTextActive]}>{p.title.replace('& ', '&\n')}</Text>
+          <Pressable key={p.id} style={[s.tab, activeSection === p.id && s.tabActive, activeSection !== p.id && { backgroundColor: d.accentLight, borderColor: d.border }]} onPress={() => setActiveSection(p.id)}>
+            <Ionicons name={p.icon as any} size={14} color={activeSection === p.id ? '#fff' : d.textMuted} />
+            <Text style={[s.tabText, activeSection === p.id && s.tabTextActive, activeSection !== p.id && { color: d.textMuted }]}>{p.title.replace('& ', '&\n')}</Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -171,9 +171,9 @@ export default function AboutScreen() {
                   <Ionicons name="leaf" size={36} color="#fff" />
                 </View>
               </View>
-              <Text style={s.brandName}>Nutriva</Text>
-              <Text style={s.brandTagline}>The Editorial Orchard</Text>
-              <Text style={s.brandDesc}>
+              <Text style={[s.brandName, { color: d.accent }]}>Nutriva</Text>
+              <Text style={[s.brandTagline, { color: d.textMuted }]}>The Editorial Orchard</Text>
+              <Text style={[s.brandDesc, { color: d.textSecondary }]}>
                 {brandDesc}
               </Text>
             </View>
@@ -181,27 +181,27 @@ export default function AboutScreen() {
             {/* Stats */}
             <View style={s.statsRow}>
               {dynamicStats.map((stat: any, idx: number) => (
-                <View key={idx} style={s.statCard}>
+                <View key={idx} style={[s.statCard, { backgroundColor: d.cardBg, borderColor: d.border }]}>
                   <Text style={s.statEmoji}>{stat.icon}</Text>
-                  <Text style={s.statNum}>{stat.num}</Text>
-                  <Text style={s.statLabel}>{stat.label}</Text>
+                  <Text style={[s.statNum, { color: d.accent }]}>{stat.num}</Text>
+                  <Text style={[s.statLabel, { color: d.textMuted }]}>{stat.label}</Text>
                 </View>
               ))}
             </View>
 
             {/* How We Work */}
-            <Text style={s.sectionTitle}>How We Work</Text>
+            <Text style={[s.sectionTitle, { color: d.text }]}>How We Work</Text>
             {dynamicSteps.map((item: any, i: number) => (
-              <View key={i} style={s.howCard}>
+              <View key={i} style={[s.howCard, { backgroundColor: d.cardBg, borderColor: d.border }]}>
                 <View style={s.howNum}>
                   <Text style={s.howNumText}>{i + 1}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
                   <View style={s.howHeader}>
-                    <Ionicons name={(item.icon || 'star') as any} size={18} color="#2E7D32" />
-                    <Text style={s.howTitle}>{item.name}</Text>
+                    <Ionicons name={(item.icon || 'star') as any} size={18} color={d.accent} />
+                    <Text style={[s.howTitle, { color: d.text }]}>{item.name}</Text>
                   </View>
-                  <Text style={s.howDesc}>{item.desc}</Text>
+                  <Text style={[s.howDesc, { color: d.textMuted }]}>{item.desc}</Text>
                 </View>
               </View>
             ))}
@@ -216,14 +216,14 @@ export default function AboutScreen() {
             </View>
 
             {/* Quick Links to Policies */}
-            <Text style={s.sectionTitle}>Policies & Legal</Text>
+            <Text style={[s.sectionTitle, { color: d.text }]}>Policies & Legal</Text>
             {POLICIES.map((p) => (
-              <Pressable key={p.id} style={s.policyLink} onPress={() => setActiveSection(p.id)}>
-                <View style={s.policyIcon}>
-                  <Ionicons name={p.icon as any} size={18} color="#2E7D32" />
+              <Pressable key={p.id} style={[s.policyLink, { borderBottomColor: d.border }]} onPress={() => setActiveSection(p.id)}>
+                <View style={[s.policyIcon, { backgroundColor: d.accentLight, borderColor: d.border }]}>
+                  <Ionicons name={p.icon as any} size={18} color={d.accent} />
                 </View>
-                <Text style={s.policyLinkText}>{p.title}</Text>
-                <Ionicons name="chevron-forward" size={16} color="rgba(129,199,132,0.25)" />
+                <Text style={[s.policyLinkText, { color: d.text }]}>{p.title}</Text>
+                <Ionicons name="chevron-forward" size={16} color={d.textDim} />
               </Pressable>
             ))}
           </>
@@ -234,22 +234,22 @@ export default function AboutScreen() {
           activeSection === policy.id && (
             <View key={policy.id}>
               <View style={s.policyHeader}>
-                <View style={s.policyHeaderIcon}>
-                  <Ionicons name={policy.icon as any} size={28} color="#2E7D32" />
+                <View style={[s.policyHeaderIcon, { backgroundColor: d.accentLight, borderColor: d.border }]}>
+                  <Ionicons name={policy.icon as any} size={28} color={d.accent} />
                 </View>
-                <Text style={s.policyTitle}>{policy.title}</Text>
-                <Text style={s.policyUpdated}>Last updated: {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</Text>
+                <Text style={[s.policyTitle, { color: d.text }]}>{policy.title}</Text>
+                <Text style={[s.policyUpdated, { color: d.textDim }]}>Last updated: {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</Text>
               </View>
 
               {policy.content.map((item, i) => (
-                <View key={i} style={s.policyItem}>
-                  <Text style={s.policyText}>{item}</Text>
+                <View key={i} style={[s.policyItem, { backgroundColor: d.cardBg, borderColor: d.border }]}>
+                  <Text style={[s.policyText, { color: d.textSecondary }]}>{item}</Text>
                 </View>
               ))}
 
-              <View style={s.policyFooter}>
-                <Ionicons name="mail-outline" size={16} color="#2E7D32" />
-                <Text style={s.policyFooterText}>Questions? Contact us at {supportEmail}</Text>
+              <View style={[s.policyFooter, { borderTopColor: d.border }]}>
+                <Ionicons name="mail-outline" size={16} color={d.accent} />
+                <Text style={[s.policyFooterText, { color: d.accent }]}>Questions? Contact us at {supportEmail}</Text>
               </View>
             </View>
           )
@@ -258,8 +258,8 @@ export default function AboutScreen() {
         {/* Footer */}
         <View style={s.footer}>
           <Text style={s.footerEmoji}>🍃</Text>
-          <Text style={s.footerText}>Made with love for fresh fruit lovers</Text>
-          <Text style={s.footerCopy}>© {new Date().getFullYear()} Nutriva. All rights reserved.</Text>
+          <Text style={[s.footerText, { color: d.textMuted }]}>Made with love for fresh fruit lovers</Text>
+          <Text style={[s.footerCopy, { color: d.textDim }]}>© {new Date().getFullYear()} Nutriva. All rights reserved.</Text>
         </View>
 
         <View style={{ height: 40 }} />

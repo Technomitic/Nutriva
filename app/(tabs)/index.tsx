@@ -216,12 +216,12 @@ export default function HomeScreen() {
       </Animated.View>
 
       {/* ===== SEARCH ===== */}
-      <View style={styles.searchBar}>
-        <Ionicons name="search" size={20} color="rgba(165,214,167,0.4)" />
+      <View style={[styles.searchBar, { backgroundColor: d.inputBg, borderColor: d.inputBorder }]}>
+        <Ionicons name="search" size={20} color={d.textDim} />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: d.text }]}
           placeholder={t('home.search_placeholder')}
-          placeholderTextColor="rgba(165,214,167,0.3)"
+          placeholderTextColor={d.textDim}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -246,10 +246,10 @@ export default function HomeScreen() {
         {FILTER_TAGS.map((tag) => (
           <Pressable
             key={tag}
-            style={[styles.filterChip, filterTag === tag && styles.filterChipActive]}
+            style={[styles.filterChip, filterTag === tag && styles.filterChipActive, filterTag !== tag && { backgroundColor: d.accentLight, borderColor: d.border }]}
             onPress={() => setFilterTag(tag)}
           >
-            <Text style={[styles.filterChipText, filterTag === tag && styles.filterChipTextActive]}>
+            <Text style={[styles.filterChipText, filterTag === tag && styles.filterChipTextActive, filterTag !== tag && { color: d.textMuted }]}>
               {tag === 'all' ? `🍎 ${t('home.filter_all')}` : tag.charAt(0) + tag.slice(1).toLowerCase()}
             </Text>
           </Pressable>
@@ -267,9 +267,9 @@ export default function HomeScreen() {
       {/* ===== TODAY'S HARVEST ===== */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('home.harvest_title')}</Text>
+          <Text style={[styles.sectionTitle, { color: d.text }]}>{t('home.harvest_title')}</Text>
           <Pressable>
-            <Text style={styles.sectionAction}>{t('common.see_all').toUpperCase()}</Text>
+            <Text style={[styles.sectionAction, { color: d.accent }]}>{t('common.see_all').toUpperCase()}</Text>
           </Pressable>
         </View>
 
@@ -277,7 +277,7 @@ export default function HomeScreen() {
           {displayProducts.map((product, idx) => (
             <Animated.View key={product.id} style={[cardAnims[idx] || {}]}>
             <Pressable
-              style={styles.harvestCard}
+              style={[styles.harvestCard, { backgroundColor: d.cardBg, borderColor: d.border }]}
               onPress={() => router.push(`/product/${product.id}`)}
             >
               <View style={styles.harvestCardImg}>
@@ -312,18 +312,18 @@ export default function HomeScreen() {
               {productRatings[product.id] && (
                 <View style={styles.cardRating}>
                   <Ionicons name="star" size={11} color="#F9A825" />
-                  <Text style={styles.cardRatingText}>
+                  <Text style={[styles.cardRatingText, { color: d.text }]}>
                     {productRatings[product.id].avg.toFixed(1)}
                   </Text>
-                  <Text style={styles.cardRatingCount}>({productRatings[product.id].count})</Text>
+                  <Text style={[styles.cardRatingCount, { color: d.textMuted }]}>({productRatings[product.id].count})</Text>
                 </View>
               )}
-              <Text style={styles.harvestName}>{product.name}</Text>
-              <Text style={styles.harvestOrigin}>
+              <Text style={[styles.harvestName, { color: d.text }]}>{product.name}</Text>
+              <Text style={[styles.harvestOrigin, { color: d.textMuted }]}>
                 {product.origin.split('·')[1]?.trim() || product.origin}
               </Text>
               <View style={styles.harvestFooter}>
-                <Text style={styles.harvestPrice}>₹{product.price}</Text>
+                <Text style={[styles.harvestPrice, { color: d.accent }]}>₹{product.price}</Text>
                 <Pressable
                   style={styles.addBtn}
                   onPress={(e) => {
@@ -353,7 +353,7 @@ export default function HomeScreen() {
           style={styles.bulkBannerBtn}
           onPress={() => router.push('/(tabs)/bulk')}
         >
-          <Text style={styles.bulkBannerBtnText}>{t('home.explore_bulk')}</Text>
+          <Text style={[styles.bulkBannerBtnText, { color: '#FFFFFF' }]}>{t('home.explore_bulk')}</Text>
         </Pressable>
       </Animated.View>
 
@@ -376,12 +376,12 @@ export default function HomeScreen() {
       {/* ===== FEATURED / EDITOR'S PICK ===== */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('home.editors_pick')}</Text>
+          <Text style={[styles.sectionTitle, { color: d.text }]}>{t('home.editors_pick')}</Text>
         </View>
 
         <Animated.View style={featuredAnim}>
         <Pressable
-          style={styles.featuredCard}
+          style={[styles.featuredCard, { backgroundColor: d.cardBg, borderColor: d.border }]}
           onPress={() => router.push(`/product/${featuredProduct.id}`)}
         >
           <View style={styles.featuredImg}>
@@ -393,15 +393,15 @@ export default function HomeScreen() {
           </View>
           <View style={styles.featuredBody}>
             <Text style={styles.featuredTag}>{featuredProduct.tag || 'ARTISANAL'}</Text>
-            <Text style={styles.featuredName}>{featuredProduct.name}</Text>
-            <Text style={styles.featuredDesc}>{featuredProduct.description}</Text>
+            <Text style={[styles.featuredName, { color: d.text }]}>{featuredProduct.name}</Text>
+            <Text style={[styles.featuredDesc, { color: d.textMuted }]}>{featuredProduct.description}</Text>
             <View style={styles.featuredFooter}>
-              <Text style={styles.featuredPrice}>
+              <Text style={[styles.featuredPrice, { color: d.accent }]}>
                 ₹{featuredProduct.price}
-                <Text style={styles.featuredUnit}> {featuredProduct.unit}</Text>
+                <Text style={[styles.featuredUnit, { color: d.textMuted }]}> {featuredProduct.unit}</Text>
               </Text>
               <Pressable
-                style={styles.addBtnSmall}
+                style={[styles.addBtnSmall, { backgroundColor: d.accentLight, borderColor: d.border }]}
                 onPress={() => handleAddToCart(featuredProduct)}
               >
                 <Ionicons name="cart-outline" size={20} color={colors.primary} />

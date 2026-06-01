@@ -345,10 +345,10 @@ export default function ProductDetailScreen() {
   );
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { backgroundColor: d.bg }]}>
       {/* Close Button */}
       <Pressable style={s.closeBtn} onPress={() => router.back()}>
-        <Ionicons name="close" size={24} color="#1B3C12" />
+        <Ionicons name="close" size={24} color={d.text} />
       </Pressable>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -399,7 +399,7 @@ export default function ProductDetailScreen() {
         {/* ── Product Info ── */}
         <View style={s.body}>
           <Text style={s.tag}>{product.tag}</Text>
-          <Text style={s.name}>{product.name}</Text>
+          <Text style={[s.name, { color: d.text }]}>{product.name}</Text>
           <Text style={s.origin}>{product.origin}</Text>
 
           {/* Rating summary */}
@@ -448,7 +448,7 @@ export default function ProductDetailScreen() {
               <TextInput
                 style={s.reviewInput}
                 placeholder="Share your experience..."
-                placeholderTextColor="rgba(27,60,18,0.3)"
+                placeholderTextColor={d.textDim}
                 value={reviewComment}
                 onChangeText={setReviewComment}
                 multiline

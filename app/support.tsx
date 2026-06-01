@@ -237,7 +237,7 @@ export default function SupportScreen() {
   const renderHeader = () => (
     <View style={styles.header}>
       <Pressable style={styles.backBtn} onPress={screen === 'topics' ? () => router.back() : handleBack}>
-        <Ionicons name="arrow-back" size={22} color="#1B3C12" />
+        <Ionicons name="arrow-back" size={22} color={d.text} />
       </Pressable>
       <View style={styles.headerInfo}>
         <Text style={[styles.headerTitle, d.s.text]}>

@@ -189,7 +189,7 @@ export default function SignupScreen() {
 
   // ── Main signup form ──
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: d.bg }]}>
       {/* Animated Background */}
       <View style={styles.bgLayer}>
         <View style={styles.bgGradientTop} />
@@ -230,7 +230,7 @@ export default function SignupScreen() {
             <View style={styles.field}>
               <Ionicons name="person-outline" size={20} color="rgba(255,255,255,0.45)" />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
                 placeholder="Full name"
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={name}
@@ -246,7 +246,7 @@ export default function SignupScreen() {
               <Ionicons name="call-outline" size={20} color="rgba(255,255,255,0.45)" />
               <TextInput
                 ref={phoneRef}
-                style={styles.input}
+                style={[styles.input, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
                 placeholder="Phone number (optional)"
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={phone}
@@ -263,7 +263,7 @@ export default function SignupScreen() {
               <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.45)" />
               <TextInput
                 ref={emailRef}
-                style={styles.input}
+                style={[styles.input, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
                 placeholder="Email address"
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={email}
@@ -281,7 +281,7 @@ export default function SignupScreen() {
               <Ionicons name="lock-closed-outline" size={20} color="rgba(255,255,255,0.45)" />
               <TextInput
                 ref={passwordRef}
-                style={styles.input}
+                style={[styles.input, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
                 placeholder="Create password"
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={password}

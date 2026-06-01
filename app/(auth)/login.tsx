@@ -230,7 +230,7 @@ export default function LoginScreen() {
             <View style={styles.field}>
               <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.45)" />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
                 placeholder="Email address"
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={email}
@@ -249,7 +249,7 @@ export default function LoginScreen() {
               <Ionicons name="lock-closed-outline" size={20} color="rgba(255,255,255,0.45)" />
               <TextInput
                 ref={passwordRef}
-                style={styles.input}
+                style={[styles.input, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
                 placeholder="Password"
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={password}

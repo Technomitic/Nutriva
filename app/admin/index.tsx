@@ -18,6 +18,7 @@ import { Order, ORDER_STATUSES, OrderStatus } from '../../src/types';
 import { supabase } from '../../src/api/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import AnalyticsSection from '../../src/components/admin/AnalyticsSection';
+import { useDynamic } from '../../src/hooks/useDynamic';
 
 type AdminTab = 'dashboard' | 'orders' | 'products' | 'customers' | 'delivery' | 'bulk' | 'promos' | 'about';
 
@@ -33,6 +34,8 @@ const TABS: { id: AdminTab; label: string; icon: string }[] = [
 ];
 
 export default function AdminScreen() {
+  const d = useDynamic();
+
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const showToast = useUIStore((s) => s.showToast);
@@ -552,15 +555,15 @@ export default function AdminScreen() {
   // ═══════════════ RENDER ═══════════════
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { backgroundColor: d.bg }]}>
       {/* Header */}
       <View style={s.header}>
         <Pressable style={s.backBtn} onPress={() => router.replace('/(tabs)/profile' as any)}>
           <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={s.headerTitle}>Orchard Pulse</Text>
-          <Text style={s.headerSub}>Admin Dashboard</Text>
+          <Text style={[s.headerTitle, { color: d.text }]}>Orchard Pulse</Text>
+          <Text style={[s.headerSub, { color: d.textMuted }]}>Admin Dashboard</Text>
         </View>
         <View style={s.onlineStatus}>
           <View style={s.onlineDot} />
@@ -649,7 +652,7 @@ export default function AdminScreen() {
               {/* Analytics Section */}
               <AnalyticsSection />
 
-              <Text style={s.sectionTitle}>Recent Orders</Text>
+              <Text style={[s.sectionTitle, { color: d.text }]}>Recent Orders</Text>
               {allOrders.slice(0, 5).map((order) => (
                 <View key={order.id} style={s.orderRow}>
                   <View style={{ flex: 1 }}>
@@ -1416,7 +1419,7 @@ export default function AdminScreen() {
                           placeholder="Notification title"
                           value={custNotifTitle}
                           onChangeText={setCustNotifTitle}
-                          placeholderTextColor="rgba(27,60,18,0.3)"
+                          placeholderTextColor={d.textDim}
                         />
                         <TextInput
                           style={[s.custNotifInput, { minHeight: 70, textAlignVertical: 'top' }]}
@@ -1424,7 +1427,7 @@ export default function AdminScreen() {
                           value={custNotifBody}
                           onChangeText={setCustNotifBody}
                           multiline
-                          placeholderTextColor="rgba(27,60,18,0.3)"
+                          placeholderTextColor={d.textDim}
                         />
 
                         {/* Send */}
@@ -1642,7 +1645,7 @@ export default function AdminScreen() {
             <>
               {/* Bulk Deals */}
               <View style={s.prodHeader}>
-                <Text style={s.sectionTitle}>Bulk Deals</Text>
+                <Text style={[s.sectionTitle, { color: d.text }]}>Bulk Deals</Text>
                 <Pressable style={s.addProdBtn} onPress={() => { setEditingBulkDeal(null); setBf({ name: '', description: '', tiers: [{ qty: '', price: '', original: '' }] }); setShowBulkForm(true); }}>
                   <Ionicons name="add" size={18} color={colors.onPrimary} />
                   <Text style={s.addProdBtnText}>Add Deal</Text>
@@ -1748,7 +1751,7 @@ export default function AdminScreen() {
 
               {/* Festival Packs */}
               <View style={[s.prodHeader, { marginTop: spacing.xl }]}>
-                <Text style={s.sectionTitle}>Festival Packs</Text>
+                <Text style={[s.sectionTitle, { color: d.text }]}>Festival Packs</Text>
                 <Pressable style={s.addProdBtn} onPress={() => { setEditingPack(null); setFpf({ name: '', description: '', price: '', original: '', items: [{ name: '', qty: '' }] }); setShowPackForm(true); }}>
                   <Ionicons name="add" size={18} color={colors.onPrimary} />
                   <Text style={s.addProdBtnText}>Add Pack</Text>
@@ -1865,7 +1868,7 @@ export default function AdminScreen() {
           {activeTab === 'promos' && (
             <>
               <View style={s.prodHeader}>
-                <Text style={s.sectionTitle}>Promo Codes</Text>
+                <Text style={[s.sectionTitle, { color: d.text }]}>Promo Codes</Text>
                 <Pressable
                   style={s.addProductBtn}
                   onPress={() => {
@@ -1883,17 +1886,17 @@ export default function AdminScreen() {
                 <View style={s.formCard}>
                   <Text style={s.formTitle}>{editingPromo ? 'Edit Coupon' : 'Create Coupon'}</Text>
 
-                  <Text style={s.fieldLabel}>Code</Text>
+                  <Text style={[s.fieldLabel, { color: d.textMuted }]}>Code</Text>
                   <TextInput
                     style={s.fieldInput}
                     placeholder="e.g. FRESH20"
-                    placeholderTextColor="rgba(27,60,18,0.3)"
+                    placeholderTextColor={d.textDim}
                     value={prf.code}
                     onChangeText={(v) => setPrf({ ...prf, code: v.toUpperCase() })}
                     autoCapitalize="characters"
                   />
 
-                  <Text style={s.fieldLabel}>Type</Text>
+                  <Text style={[s.fieldLabel, { color: d.textMuted }]}>Type</Text>
                   <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                     <Pressable
                       style={[s.promoTypeBtn, prf.type === 'percent' && s.promoTypeBtnActive]}
@@ -1911,22 +1914,22 @@ export default function AdminScreen() {
 
                   <View style={{ flexDirection: 'row', gap: 10 }}>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.fieldLabel}>{prf.type === 'percent' ? 'Discount %' : 'Discount ₹'}</Text>
+                      <Text style={[s.fieldLabel, { color: d.textMuted }]}>{prf.type === 'percent' ? 'Discount %' : 'Discount ₹'}</Text>
                       <TextInput
                         style={s.fieldInput}
                         placeholder={prf.type === 'percent' ? '20' : '100'}
-                        placeholderTextColor="rgba(27,60,18,0.3)"
+                        placeholderTextColor={d.textDim}
                         value={prf.value}
                         onChangeText={(v) => setPrf({ ...prf, value: v })}
                         keyboardType="numeric"
                       />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.fieldLabel}>Min Order ₹</Text>
+                      <Text style={[s.fieldLabel, { color: d.textMuted }]}>Min Order ₹</Text>
                       <TextInput
                         style={s.fieldInput}
                         placeholder="500"
-                        placeholderTextColor="rgba(27,60,18,0.3)"
+                        placeholderTextColor={d.textDim}
                         value={prf.min_order}
                         onChangeText={(v) => setPrf({ ...prf, min_order: v })}
                         keyboardType="numeric"
@@ -1936,22 +1939,22 @@ export default function AdminScreen() {
 
                   <View style={{ flexDirection: 'row', gap: 10 }}>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.fieldLabel}>Max Discount ₹</Text>
+                      <Text style={[s.fieldLabel, { color: d.textMuted }]}>Max Discount ₹</Text>
                       <TextInput
                         style={s.fieldInput}
                         placeholder="200 (0 = no cap)"
-                        placeholderTextColor="rgba(27,60,18,0.3)"
+                        placeholderTextColor={d.textDim}
                         value={prf.max_discount}
                         onChangeText={(v) => setPrf({ ...prf, max_discount: v })}
                         keyboardType="numeric"
                       />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.fieldLabel}>Max Uses</Text>
+                      <Text style={[s.fieldLabel, { color: d.textMuted }]}>Max Uses</Text>
                       <TextInput
                         style={s.fieldInput}
                         placeholder="0 = unlimited"
-                        placeholderTextColor="rgba(27,60,18,0.3)"
+                        placeholderTextColor={d.textDim}
                         value={prf.max_uses}
                         onChangeText={(v) => setPrf({ ...prf, max_uses: v })}
                         keyboardType="numeric"
@@ -1959,11 +1962,11 @@ export default function AdminScreen() {
                     </View>
                   </View>
 
-                  <Text style={s.fieldLabel}>Valid Until (optional)</Text>
+                  <Text style={[s.fieldLabel, { color: d.textMuted }]}>Valid Until (optional)</Text>
                   <TextInput
                     style={s.fieldInput}
                     placeholder="YYYY-MM-DD"
-                    placeholderTextColor="rgba(27,60,18,0.3)"
+                    placeholderTextColor={d.textDim}
                     value={prf.valid_until}
                     onChangeText={(v) => setPrf({ ...prf, valid_until: v })}
                   />

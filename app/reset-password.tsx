@@ -71,7 +71,7 @@ export default function ResetPasswordScreen() {
 
   if (success) {
     return (
-      <View style={s.container}>
+      <View style={[s.container, { backgroundColor: d.bg }]}>
         <View style={s.successCard}>
           <View style={s.successIcon}>
             <Ionicons name="checkmark-circle" size={56} color="#43A047" />
@@ -95,7 +95,7 @@ export default function ResetPasswordScreen() {
         {/* Header */}
         <View style={s.header}>
           <Pressable style={s.backBtn} onPress={() => router.replace('/(auth)/login')}>
-            <Ionicons name="arrow-back" size={22} color="#1B3C12" />
+            <Ionicons name="arrow-back" size={22} color={d.text} />
           </Pressable>
         </View>
 
@@ -107,8 +107,8 @@ export default function ResetPasswordScreen() {
           </View>
         </View>
 
-        <Text style={s.title}>Set New Password</Text>
-        <Text style={s.subtitle}>
+        <Text style={[s.title, { color: d.text }]}>Set New Password</Text>
+        <Text style={[s.subtitle, { color: d.textMuted }]}>
           Enter your new password below. Make sure it's at least 6 characters long.
         </Text>
 
@@ -126,7 +126,7 @@ export default function ResetPasswordScreen() {
           <TextInput
             style={s.input}
             placeholder="New password"
-            placeholderTextColor="rgba(27,60,18,0.3)"
+            placeholderTextColor={d.textDim}
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
@@ -147,7 +147,7 @@ export default function ResetPasswordScreen() {
           <TextInput
             style={s.input}
             placeholder="Confirm new password"
-            placeholderTextColor="rgba(27,60,18,0.3)"
+            placeholderTextColor={d.textDim}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={!showPassword}

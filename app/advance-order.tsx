@@ -156,16 +156,16 @@ export default function AdvanceOrderScreen() {
   };
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { backgroundColor: d.bg }]}>
       {/* Header */}
       <View style={s.header}>
         <Pressable style={s.backBtn} onPress={() => router.replace('/(tabs)')}>
 
-          <Ionicons name="arrow-back" size={22} color="#1B3C12" />
+          <Ionicons name="arrow-back" size={22} color={d.text} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={s.headerTitle}>Advance Order</Text>
-          <Text style={s.headerSub}>Schedule your delivery in advance</Text>
+          <Text style={[s.headerTitle, { color: d.text }]}>Advance Order</Text>
+          <Text style={[s.headerSub, { color: d.textMuted }]}>Schedule your delivery in advance</Text>
         </View>
       </View>
 

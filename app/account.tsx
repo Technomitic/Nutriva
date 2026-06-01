@@ -244,7 +244,7 @@ export default function MyAccountScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.headerBack} onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)/profile' as any)}>
-          <Ionicons name="arrow-back" size={22} color="#1B3C12" />
+          <Ionicons name="arrow-back" size={22} color={d.text} />
         </Pressable>
         <Text style={[styles.headerTitle, d.s.text]}>My Account</Text>
         <View style={{ width: 40 }} />
@@ -280,7 +280,7 @@ export default function MyAccountScreen() {
         <Text style={styles.sectionTitle}>Personal Information</Text>
         <View style={styles.card}>
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>Full Name</Text>
+            <Text style={[styles.fieldLabel, { color: d.textMuted }]}>Full Name</Text>
             <TextInput
               style={styles.fieldInput}
               value={name}
@@ -293,7 +293,7 @@ export default function MyAccountScreen() {
           <View style={styles.divider} />
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>Email</Text>
+            <Text style={[styles.fieldLabel, { color: d.textMuted }]}>Email</Text>
             <View style={styles.readOnlyRow}>
               <Ionicons name="lock-closed-outline" size={14} color="rgba(27,60,18,0.3)" />
               <Text style={styles.readOnlyText}>{user.email}</Text>
@@ -303,7 +303,7 @@ export default function MyAccountScreen() {
           <View style={styles.divider} />
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>Phone Number</Text>
+            <Text style={[styles.fieldLabel, { color: d.textMuted }]}>Phone Number</Text>
             <TextInput
               style={styles.fieldInput}
               value={phone}
@@ -317,7 +317,7 @@ export default function MyAccountScreen() {
           <View style={styles.divider} />
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>Default Address</Text>
+            <Text style={[styles.fieldLabel, { color: d.textMuted }]}>Default Address</Text>
             <TextInput
               style={[styles.fieldInput, styles.fieldTextArea]}
               value={address}
@@ -368,7 +368,7 @@ export default function MyAccountScreen() {
             <View style={styles.passwordFields}>
               <View style={styles.divider} />
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>New Password</Text>
+                <Text style={[styles.fieldLabel, { color: d.textMuted }]}>New Password</Text>
                 <TextInput
                   style={styles.fieldInput}
                   value={newPassword}
@@ -380,7 +380,7 @@ export default function MyAccountScreen() {
               </View>
 
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Confirm Password</Text>
+                <Text style={[styles.fieldLabel, { color: d.textMuted }]}>Confirm Password</Text>
                 <TextInput
                   style={styles.fieldInput}
                   value={confirmPassword}
