@@ -6,12 +6,13 @@ import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, Pressable, FlatList,
   StyleSheet, KeyboardAvoidingView, Platform,
-  Image, ActivityIndicator, Alert,
+  Image, ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/authStore';
+import { useUIStore } from '../../src/stores/uiStore';
 import { ChatMessage } from '../../src/types';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
@@ -23,6 +24,7 @@ export default function ChatScreen() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const showToast = useUIStore((s) => s.showToast);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const flatListRef = useRef<FlatList>(null);
@@ -103,7 +105,7 @@ export default function ChatScreen() {
       // Request permission
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Please allow access to your photos to send images.');
+        showToast('Please allow photo access to send images');
         return;
       }
 
@@ -112,50 +114,78 @@ export default function ChatScreen() {
         mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.7,
-        base64: Platform.OS === 'web', // Use base64 on web for upload
       });
 
       if (result.canceled || !result.assets?.[0]) return;
 
       setUploadingImage(true);
       const asset = result.assets[0];
-      const fileExt = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
-      const fileName = `${orderId}/${Date.now()}.${fileExt}`;
 
-      // Upload to Supabase Storage
-      let uploadError: any = null;
+      // Determine file extension
+      const mimeToExt: Record<string, string> = {
+        'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
+      };
+      const ext = mimeToExt[asset.mimeType || ''] || 'jpg';
+      const fileName = `${orderId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token || supabaseKey;
+
+      let uploadOk = false;
 
       if (Platform.OS === 'web') {
-        // On web, fetch the blob from the URI
+        // Web: use fetch + FormData (proven pattern from admin)
         const response = await fetch(asset.uri);
         const blob = await response.blob();
-        const { error } = await supabase.storage
-          .from('chat-images')
-          .upload(fileName, blob, {
-            contentType: `image/${fileExt === 'png' ? 'png' : 'jpeg'}`,
-            upsert: false,
-          });
-        uploadError = error;
-      } else {
-        // On native, read file as base64
-        const FileSystem = require('expo-file-system');
-        const base64Data = await FileSystem.readAsStringAsync(asset.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const byteArray = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-        const { error } = await supabase.storage
-          .from('chat-images')
-          .upload(fileName, byteArray, {
-            contentType: `image/${fileExt === 'png' ? 'png' : 'jpeg'}`,
-            upsert: false,
-          });
-        uploadError = error;
-      }
+        const formData = new FormData();
+        formData.append('', blob, `chat.${ext}`);
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        Alert.alert('Upload failed', 'Could not upload image. Please try again.');
-        return;
+        const uploadRes = await fetch(
+          `${supabaseUrl}/storage/v1/object/chat-images/${fileName}`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'apikey': supabaseKey || '',
+              'x-upsert': 'true',
+            },
+            body: formData,
+          }
+        );
+        uploadOk = uploadRes.ok;
+        if (!uploadOk) {
+          const errText = await uploadRes.text().catch(() => 'Unknown error');
+          console.error('Upload failed:', errText);
+          showToast('Upload failed. Please try again.');
+          return;
+        }
+      } else {
+        // Mobile: fetch blob and upload via arraybuffer
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+
+        const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as ArrayBuffer);
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(blob);
+        });
+
+        const { error: uploadError } = await supabase.storage
+          .from('chat-images')
+          .upload(fileName, arrayBuffer, {
+            contentType: asset.mimeType || `image/${ext}`,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          showToast('Upload failed. Please try again.');
+          return;
+        }
+        uploadOk = true;
       }
 
       // Get public URL
@@ -165,7 +195,7 @@ export default function ChatScreen() {
 
       const imageUrl = urlData?.publicUrl;
       if (!imageUrl) {
-        Alert.alert('Error', 'Could not get image URL.');
+        showToast('Could not get image URL');
         return;
       }
 
@@ -179,7 +209,7 @@ export default function ChatScreen() {
       });
     } catch (err: any) {
       console.error('Image send error:', err);
-      Alert.alert('Error', 'Failed to send image.');
+      showToast('Failed to send image');
     } finally {
       setUploadingImage(false);
     }
