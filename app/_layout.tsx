@@ -48,7 +48,14 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
-  const [isRecovery, setIsRecovery] = useState(false);
+  const [isRecovery, setIsRecovery] = useState(() => {
+    // Detect recovery token in URL hash immediately on mount
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash && hash.includes('type=recovery')) return true;
+    }
+    return false;
+  });
 
   // On web, detect recovery token in URL hash, establish session, then redirect
   useEffect(() => {
@@ -107,7 +114,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
     if (!isAuthenticated && !inAuthGroup) {
       // Allow browsing tabs without auth for now
-    } else if (isAuthenticated && inAuthGroup) {
+    } else if (isAuthenticated && inAuthGroup && !isRecovery) {
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, segments, isLoading, isRecovery]);
