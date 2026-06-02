@@ -153,10 +153,12 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     // Fetch all orders to compute real stats per customer
     const { data: orderData } = await supabase
       .from('orders')
-      .select('user_id, total');
+      .select('user_id, total, status');
 
     const orderStats: Record<string, { count: number; spent: number }> = {};
     (orderData || []).forEach((o: any) => {
+      // Skip cancelled orders from customer stats
+      if (o.status === 'Cancelled') return;
       if (!orderStats[o.user_id]) {
         orderStats[o.user_id] = { count: 0, spent: 0 };
       }
@@ -425,8 +427,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
     set({
       kpis: {
-        totalRevenue: allOrders.reduce((sum, o) => sum + (o.total || 0), 0),
-        orderCount: allOrders.length,
+        totalRevenue: allOrders
+          .filter((o) => o.status !== 'Cancelled')
+          .reduce((sum, o) => sum + (o.total || 0), 0),
+        orderCount: allOrders.filter((o) => o.status !== 'Cancelled').length,
         customerCount: customers.length,
         todayOrders,
         pendingOrders,
