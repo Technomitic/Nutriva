@@ -294,7 +294,14 @@ export default function ChatScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+        <Pressable style={styles.backBtn} onPress={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            // Fallback when no history (e.g. web direct link)
+            router.replace(user?.role === 'admin' ? '/admin' : '/(tabs)/orders' as any);
+          }
+        }}>
           <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
         </Pressable>
         <View style={styles.headerInfo}>
