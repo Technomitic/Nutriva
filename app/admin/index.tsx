@@ -428,13 +428,29 @@ export default function AdminScreen() {
     }
     const doDelete = async () => {
       try {
+        // Delete user's chat messages (via their orders)
+        const { data: userOrders } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('user_id', customer.id);
+        if (userOrders && userOrders.length > 0) {
+          const orderIds = userOrders.map((o: any) => o.id);
+          await supabase.from('chat_messages').delete().in('order_id', orderIds);
+        }
         // Delete user's orders
         await supabase.from('orders').delete().eq('user_id', customer.id);
         // Delete user's notifications
         await supabase.from('notifications').delete().eq('user_id', customer.id);
-        // Delete user's profile
-        const { error } = await supabase.from('profiles').delete().eq('id', customer.id);
+        // Delete user's profile and verify it was actually deleted
+        const { data, error } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', customer.id)
+          .select();
         if (error) throw error;
+        if (!data || data.length === 0) {
+          throw new Error('Delete blocked by database policy. Please run the admin DELETE policies in Supabase SQL Editor.');
+        }
         setSelectedCustomer(null);
         setCustomerOrders([]);
         showToast(`${customer.name || 'User'} deleted`);

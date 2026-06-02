@@ -178,6 +178,25 @@ CREATE POLICY "Admin manage delivery" ON delivery_boys
 CREATE POLICY "Public read delivery" ON delivery_boys
   FOR SELECT USING (true);
 
+-- Admin delete policies (for user management)
+CREATE POLICY "Admin delete profiles" ON profiles
+  FOR DELETE USING (EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+CREATE POLICY "Admin delete orders" ON orders
+  FOR DELETE USING (EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+CREATE POLICY "Admin delete chat messages" ON chat_messages
+  FOR DELETE USING (EXISTS (
+    SELECT 1 FROM orders WHERE orders.id = chat_messages.order_id
+      AND EXISTS (
+        SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND role = 'admin'
+      )
+  ));
+
 -- ============================================
 -- REALTIME (enable for chat + orders)
 -- ============================================
