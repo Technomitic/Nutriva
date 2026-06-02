@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator,
+  View, Text, ScrollView, Pressable, Image, StyleSheet, ActivityIndicator,
   Alert, Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -259,7 +259,13 @@ export default function OrderDetailScreen() {
               <View key={`${item.product_id}-${index}`}>
                 <View style={styles.productRow}>
                   <View style={styles.productIcon}>
-                    <Text style={styles.productEmoji}>🍎</Text>
+                    {(() => {
+                      const local = localProducts.find((p) => p.id === item.product_id);
+                      if (local?.image) {
+                        return <Image source={local.image} style={styles.productImg} resizeMode="contain" />;
+                      }
+                      return <Ionicons name="basket-outline" size={20} color="#2E7D32" />;
+                    })()}
                   </View>
                   <View style={styles.productInfo}>
                     <Text style={[styles.productName, { color: d.text }]}>{item.name}</Text>
@@ -478,6 +484,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   productEmoji: { fontSize: 20 },
+  productImg: { width: 32, height: 32 },
   productInfo: { flex: 1 },
   productName: { fontSize: 15, fontWeight: '600', color: '#2E4A26' },
   productMeta: { fontSize: 12, color: 'rgba(27,60,18,0.5)', marginTop: 2 },
