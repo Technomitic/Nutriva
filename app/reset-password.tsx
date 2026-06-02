@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
 import { supabase } from '../src/api/supabase';
 import { useUIStore } from '../src/stores/uiStore';
+import { useAuthStore } from '../src/stores/authStore';
 import { useDynamic } from '../src/hooks/useDynamic';
 import { sanitizeError } from '../src/utils/sanitizeError';
 
@@ -21,6 +22,7 @@ export default function ResetPasswordScreen() {
 
   const router = useRouter();
   const showToast = useUIStore((s) => s.showToast);
+  const signOut = useAuthStore((s) => s.signOut);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -59,8 +61,9 @@ export default function ResetPasswordScreen() {
       setSuccess(true);
       showToast('Password updated successfully! ✓');
 
-      // Redirect to login after a delay
-      setTimeout(() => {
+      // Sign out first to clear recovery state, then redirect to login
+      setTimeout(async () => {
+        await signOut();
         router.replace('/(auth)/login');
       }, 2000);
     } catch (err: any) {
@@ -95,7 +98,7 @@ export default function ResetPasswordScreen() {
       <View style={s.inner}>
         {/* Header */}
         <View style={s.header}>
-          <Pressable style={s.backBtn} onPress={() => router.replace('/(auth)/login')}>
+          <Pressable style={s.backBtn} onPress={async () => { await signOut(); router.replace('/(auth)/login'); }}>
             <Ionicons name="arrow-back" size={22} color={d.text} />
           </Pressable>
         </View>
@@ -173,7 +176,7 @@ export default function ResetPasswordScreen() {
         </Pressable>
 
         {/* Back to login link */}
-        <Pressable style={s.linkBtn} onPress={() => router.replace('/(auth)/login')}>
+        <Pressable style={s.linkBtn} onPress={async () => { await signOut(); router.replace('/(auth)/login'); }}>
           <Text style={s.linkText}>← Back to Login</Text>
         </Pressable>
       </View>
