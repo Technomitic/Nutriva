@@ -104,7 +104,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isLoading || isRecovery) return;
+    if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const onResetPage = segments[0] === 'reset-password';
@@ -112,9 +112,18 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     // Don't redirect away from the reset-password page
     if (onResetPage) return;
 
+    // Recovery mode: actively redirect to reset password once session is ready
+    if (isRecovery && isAuthenticated) {
+      router.replace('/reset-password');
+      return;
+    }
+
+    // Skip other routing while in recovery (waiting for session)
+    if (isRecovery) return;
+
     if (!isAuthenticated && !inAuthGroup) {
       // Allow browsing tabs without auth for now
-    } else if (isAuthenticated && inAuthGroup && !isRecovery) {
+    } else if (isAuthenticated && inAuthGroup) {
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, segments, isLoading, isRecovery]);
