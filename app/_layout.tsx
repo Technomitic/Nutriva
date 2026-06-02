@@ -29,7 +29,7 @@ import { Toast } from '../src/components/ui/Toast';
 import { requestAllPermissions, configureNotifications } from '../src/utils/permissions';
 import { loadSavedLocale } from '../src/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '../src/api/supabase';
+import { supabase, initialUrlWasRecovery } from '../src/api/supabase';
 import * as Notifications from 'expo-notifications';
 
 const PERMISSIONS_ASKED_KEY = 'fresh-permissions-asked';
@@ -48,44 +48,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
-  const [isRecovery, setIsRecovery] = useState(() => {
-    // Detect recovery token in URL hash immediately on mount
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      if (hash && hash.includes('type=recovery')) return true;
-    }
-    return false;
-  });
-
-  // On web, detect recovery token in URL hash, establish session, then redirect
-  useEffect(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined' || !supabase) return;
-
-    const hash = window.location.hash;
-    if (!hash || !hash.includes('type=recovery')) return;
-
-    // Parse tokens from the hash fragment: #access_token=...&refresh_token=...&type=recovery
-    const params = new URLSearchParams(hash.substring(1));
-    const accessToken = params.get('access_token');
-    const refreshToken = params.get('refresh_token');
-
-    if (!accessToken || !refreshToken) return;
-
-    setIsRecovery(true);
-
-    // Establish the session FIRST, then redirect
-    supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    }).then(() => {
-      // Clear the hash so it doesn't get re-processed
-      window.location.hash = '';
-      router.replace('/reset-password');
-    }).catch((err) => {
-      console.error('Failed to set recovery session:', err);
-      setIsRecovery(false);
-    });
-  }, []);
+  // Use the flag captured in supabase.ts before createClient consumed the hash
+  const [isRecovery, setIsRecovery] = useState(initialUrlWasRecovery);
 
   // Fallback: listen for PASSWORD_RECOVERY event
   useEffect(() => {

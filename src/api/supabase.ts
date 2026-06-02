@@ -19,6 +19,13 @@ const isConfigured =
 
 import { Platform } from 'react-native';
 
+// ⚠️ Capture the URL hash BEFORE createClient() — Supabase's
+// detectSessionInUrl will auto-consume and clear the hash fragment.
+export const initialUrlWasRecovery =
+  Platform.OS === 'web' &&
+  typeof window !== 'undefined' &&
+  window.location.hash.includes('type=recovery');
+
 export const supabase: SupabaseClient | null = isConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
