@@ -263,7 +263,7 @@ export default function ChatScreen() {
   };
 
   // ── UPI Payment ──
-  const UPI_ID = 'nutriva@upi'; // Shop's UPI ID
+  const UPI_ID = 'laxlandge198@okicici'; // Shop's UPI ID
   const UPI_NAME = 'Nutriva';
 
   const openUPIPayment = async (amount?: number) => {
