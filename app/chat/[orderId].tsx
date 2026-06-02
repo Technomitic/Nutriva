@@ -7,13 +7,14 @@ import {
   View, Text, TextInput, Pressable, FlatList,
   StyleSheet, KeyboardAvoidingView, Platform,
   Image, ActivityIndicator, Modal, Dimensions,
+  Linking, Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useUIStore } from '../../src/stores/uiStore';
-import { ChatMessage } from '../../src/types';
+import { ChatMessage, Order } from '../../src/types';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import * as ImagePicker from 'expo-image-picker';
@@ -29,6 +30,21 @@ export default function ChatScreen() {
   const [input, setInput] = useState('');
   const flatListRef = useRef<FlatList>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [order, setOrder] = useState<Order | null>(null);
+
+  // Fetch order details for payment amount
+  useEffect(() => {
+    if (!orderId || !supabase) return;
+    const fetchOrder = async () => {
+      const { data } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+      if (data) setOrder(data as Order);
+    };
+    fetchOrder();
+  }, [orderId]);
 
   // Subscribe to real-time chat messages
   useEffect(() => {
@@ -227,6 +243,65 @@ export default function ChatScreen() {
     }
   };
 
+  // ── UPI Payment ──
+  const UPI_ID = 'nutriva@upi'; // Shop's UPI ID
+  const UPI_NAME = 'Nutriva';
+
+  const openUPIPayment = async (amount?: number) => {
+    const payAmount = amount || order?.total || 0;
+    if (payAmount <= 0) {
+      showToast('Order amount not available');
+      return;
+    }
+
+    // Build UPI deep link
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${payAmount}&cu=INR&tn=${encodeURIComponent(`Payment for Order`)}` ;
+
+    if (Platform.OS === 'web') {
+      // Web can't open UPI deep links — show copy-able info
+      if (typeof window !== 'undefined') {
+        window.alert(
+          `UPI ID: ${UPI_ID}\nAmount: ₹${payAmount.toLocaleString()}\n\nOpen your UPI app and pay to the above ID.`
+        );
+      }
+      return;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(upiUrl);
+      if (supported) {
+        await Linking.openURL(upiUrl);
+      } else {
+        // Fallback: try common UPI app schemes
+        const fallbacks = [
+          `tez://upi/pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${payAmount}&cu=INR`,
+          `phonepe://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${payAmount}&cu=INR`,
+          `paytmmp://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${payAmount}&cu=INR`,
+        ];
+        let opened = false;
+        for (const url of fallbacks) {
+          try {
+            const canOpen = await Linking.canOpenURL(url);
+            if (canOpen) {
+              await Linking.openURL(url);
+              opened = true;
+              break;
+            }
+          } catch {}
+        }
+        if (!opened) {
+          Alert.alert(
+            'No UPI App Found',
+            `Please install a UPI app (Google Pay, PhonePe, Paytm) and pay ₹${payAmount.toLocaleString()} to:\n\n${UPI_ID}`,
+            [{ text: 'OK' }]
+          );
+        }
+      }
+    } catch (err) {
+      showToast('Could not open payment app');
+    }
+  };
+
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     if (item.sender === 'system') {
       return (
@@ -240,24 +315,31 @@ export default function ChatScreen() {
 
     if (item.type === 'qr') {
       return (
+        <Pressable onPress={() => openUPIPayment(item.amount ? parseFloat(item.amount) : undefined)}>
         <View style={[styles.msgBubble, styles.adminBubble]}>
           <View style={styles.qrCard}>
             <Text style={styles.qrTitle}>UPI Payment QR</Text>
             <View style={styles.qrIcon}>
               <Ionicons name="qr-code" size={48} color={colors.primary} />
             </View>
-            <Text style={styles.qrUpi}>nutriva@upi</Text>
+            <Text style={styles.qrUpi}>{UPI_ID}</Text>
             <Text style={styles.qrNote}>
-              Scan to pay · Amount: {item.amount || 'As discussed'}
+              Scan to pay · Amount: {item.amount || (order ? `₹${order.total?.toLocaleString()}` : 'As discussed')}
             </Text>
+            <View style={styles.payUpiBtn}>
+              <Ionicons name="wallet-outline" size={16} color="#fff" />
+              <Text style={styles.payUpiBtnText}>Pay via UPI App</Text>
+            </View>
           </View>
           <Text style={styles.msgTime}>{formatTime(item.created_at)}</Text>
         </View>
+        </Pressable>
       );
     }
 
     // Image message
     if (item.type === 'image') {
+      const isFromAdmin = isAdmin;
       return (
         <View style={[styles.msgBubble, isAdmin ? styles.adminBubble : styles.userBubble, styles.imageBubble]}>
           <Pressable onPress={() => setPreviewImage(item.text)}>
@@ -267,6 +349,13 @@ export default function ChatScreen() {
               resizeMode="cover"
             />
           </Pressable>
+          {/* Show Pay via UPI button on admin-sent images (likely QR codes) */}
+          {isFromAdmin && user?.role !== 'admin' && (
+            <Pressable style={styles.payImageBtn} onPress={() => openUPIPayment()}>
+              <Ionicons name="wallet-outline" size={14} color="#fff" />
+              <Text style={styles.payImageBtnText}>Pay ₹{order?.total?.toLocaleString() || '...'} via UPI</Text>
+            </Pressable>
+          )}
           <Text style={[styles.msgTime, isAdmin && styles.adminTime, { marginTop: 6, marginRight: 4 }]}>
             {formatTime(item.created_at)}
           </Text>
@@ -373,6 +462,19 @@ export default function ChatScreen() {
               resizeMode="contain"
             />
           )}
+          {/* Pay via UPI button in preview (only for non-admin users) */}
+          {previewImage && user?.role !== 'admin' && order && (
+            <Pressable
+              style={styles.previewPayBtn}
+              onPress={() => {
+                setPreviewImage(null);
+                openUPIPayment();
+              }}
+            >
+              <Ionicons name="wallet" size={20} color="#fff" />
+              <Text style={styles.previewPayBtnText}>Pay ₹{order.total?.toLocaleString()} via UPI</Text>
+            </Pressable>
+          )}
         </View>
       </Modal>
     </KeyboardAvoidingView>
@@ -430,6 +532,31 @@ const styles = StyleSheet.create({
   qrIcon: { marginBottom: spacing.base },
   qrUpi: { fontSize: 14, fontWeight: '600', color: '#2E7D32' },
   qrNote: { fontSize: 11, color: 'rgba(27, 60, 18, 0.5)', marginTop: 4 },
+  // UPI Pay buttons
+  payUpiBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: '#2E7D32', paddingVertical: 10, paddingHorizontal: 16,
+    borderRadius: radius.full, marginTop: spacing.base,
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)',
+  },
+  payUpiBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  payImageBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: '#2E7D32', paddingVertical: 8, paddingHorizontal: 14,
+    borderRadius: radius.full, marginTop: 6, marginHorizontal: 4,
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)',
+  },
+  payImageBtnText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  previewPayBtn: {
+    position: 'absolute', bottom: 60,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#2E7D32', paddingVertical: 16, paddingHorizontal: 32,
+    borderRadius: radius.full,
+    shadowColor: '#2E7D32', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4, shadowRadius: 12, elevation: 8,
+    borderWidth: 1, borderColor: 'rgba(165, 214, 167, 0.3)',
+  },
+  previewPayBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   // Upload indicator
   uploadingBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
