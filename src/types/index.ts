@@ -82,7 +82,7 @@ export interface ChatMessage {
   order_id: string;
   sender: 'user' | 'admin' | 'system';
   text: string;
-  type: 'text' | 'qr';
+  type: 'text' | 'qr' | 'image';
   amount?: string;
   created_at: string;
 }

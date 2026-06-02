@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, Pressable, FlatList,
   StyleSheet, KeyboardAvoidingView, Platform,
+  Image, ActivityIndicator, Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +15,7 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { ChatMessage } from '../../src/types';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ChatScreen() {
   const d = useDynamic();
@@ -68,6 +70,7 @@ export default function ChatScreen() {
   }, [messages]);
 
   const [sending, setSending] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const sendMessage = async () => {
     const text = input.trim();
@@ -90,6 +93,95 @@ export default function ChatScreen() {
       setInput(text);
     } finally {
       setSending(false);
+    }
+  };
+
+  const pickAndSendImage = async () => {
+    if (!orderId || !user || !supabase || uploadingImage) return;
+
+    try {
+      // Request permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please allow access to your photos to send images.');
+        return;
+      }
+
+      // Pick image
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.7,
+        base64: Platform.OS === 'web', // Use base64 on web for upload
+      });
+
+      if (result.canceled || !result.assets?.[0]) return;
+
+      setUploadingImage(true);
+      const asset = result.assets[0];
+      const fileExt = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${orderId}/${Date.now()}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      let uploadError: any = null;
+
+      if (Platform.OS === 'web') {
+        // On web, fetch the blob from the URI
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+        const { error } = await supabase.storage
+          .from('chat-images')
+          .upload(fileName, blob, {
+            contentType: `image/${fileExt === 'png' ? 'png' : 'jpeg'}`,
+            upsert: false,
+          });
+        uploadError = error;
+      } else {
+        // On native, read file as base64
+        const FileSystem = require('expo-file-system');
+        const base64Data = await FileSystem.readAsStringAsync(asset.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const byteArray = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        const { error } = await supabase.storage
+          .from('chat-images')
+          .upload(fileName, byteArray, {
+            contentType: `image/${fileExt === 'png' ? 'png' : 'jpeg'}`,
+            upsert: false,
+          });
+        uploadError = error;
+      }
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        Alert.alert('Upload failed', 'Could not upload image. Please try again.');
+        return;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('chat-images')
+        .getPublicUrl(fileName);
+
+      const imageUrl = urlData?.publicUrl;
+      if (!imageUrl) {
+        Alert.alert('Error', 'Could not get image URL.');
+        return;
+      }
+
+      // Send image message
+      const sender = user.role === 'admin' ? 'admin' : 'user';
+      await supabase.from('chat_messages').insert({
+        order_id: orderId,
+        sender,
+        text: imageUrl,
+        type: 'image',
+      });
+    } catch (err: any) {
+      console.error('Image send error:', err);
+      Alert.alert('Error', 'Failed to send image.');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -129,6 +221,22 @@ export default function ChatScreen() {
             </Text>
           </View>
           <Text style={styles.msgTime}>{formatTime(item.created_at)}</Text>
+        </View>
+      );
+    }
+
+    // Image message
+    if (item.type === 'image') {
+      return (
+        <View style={[styles.msgBubble, isAdmin ? styles.adminBubble : styles.userBubble, styles.imageBubble]}>
+          <Image
+            source={{ uri: item.text }}
+            style={styles.chatImage}
+            resizeMode="cover"
+          />
+          <Text style={[styles.msgTime, isAdmin && styles.adminTime]}>
+            {formatTime(item.created_at)}
+          </Text>
         </View>
       );
     }
@@ -176,8 +284,23 @@ export default function ChatScreen() {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
       />
 
+      {/* Upload indicator */}
+      {uploadingImage && (
+        <View style={styles.uploadingBar}>
+          <ActivityIndicator size="small" color="#2E7D32" />
+          <Text style={styles.uploadingText}>Uploading image...</Text>
+        </View>
+      )}
+
       {/* Input */}
       <View style={styles.inputBar}>
+        <Pressable
+          style={styles.attachBtn}
+          onPress={pickAndSendImage}
+          disabled={uploadingImage}
+        >
+          <Ionicons name="image-outline" size={22} color={uploadingImage ? 'rgba(46,125,50,0.3)' : '#2E7D32'} />
+        </Pressable>
         <TextInput
           style={styles.inputField}
           placeholder="Type a message..."
@@ -224,6 +347,7 @@ const styles = StyleSheet.create({
   msgBubble: { maxWidth: '80%', marginBottom: spacing.sm, borderRadius: radius.md, padding: spacing.base },
   adminBubble: { alignSelf: 'flex-start', backgroundColor: 'rgba(255, 255, 255, 0.7)', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.10)' },
   userBubble: { alignSelf: 'flex-end', backgroundColor: '#2E7D32', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)' },
+  imageBubble: { padding: 4, overflow: 'hidden' },
   msgText: { fontSize: 14, lineHeight: 20 },
   adminText: { color: '#2E4A26' },
   userText: { color: '#FFFFFF' },
@@ -231,6 +355,10 @@ const styles = StyleSheet.create({
   adminTime: { color: 'rgba(27, 60, 18, 0.35)' },
   systemMsg: { alignItems: 'center', marginVertical: spacing.sm },
   systemMsgText: { fontSize: 12, color: 'rgba(27, 60, 18, 0.5)', fontStyle: 'italic' },
+  // Image in chat
+  chatImage: {
+    width: 200, height: 200, borderRadius: radius.md - 2,
+  },
   // QR Card
   qrCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.7)', borderRadius: radius.sm,
@@ -241,12 +369,25 @@ const styles = StyleSheet.create({
   qrIcon: { marginBottom: spacing.base },
   qrUpi: { fontSize: 14, fontWeight: '600', color: '#2E7D32' },
   qrNote: { fontSize: 11, color: 'rgba(27, 60, 18, 0.5)', marginTop: 4 },
+  // Upload indicator
+  uploadingBar: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    paddingVertical: 8, backgroundColor: 'rgba(46, 125, 50, 0.06)',
+    borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.08)',
+  },
+  uploadingText: { fontSize: 13, color: '#2E7D32', fontWeight: '500' },
   // Input
   inputBar: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     paddingHorizontal: spacing.lg, paddingVertical: spacing.base,
     paddingBottom: 24, backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.08)',
+  },
+  attachBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(46, 125, 50, 0.08)',
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.12)',
   },
   inputField: {
     flex: 1, backgroundColor: 'rgba(46, 125, 50, 0.05)', borderRadius: radius.full,
