@@ -162,6 +162,10 @@ export default function LoginScreen() {
     <View style={[styles.container, d.s.screenBg]}>
       {/* Animated Background */}
       <View style={styles.bgLayer}>
+        {/* Vibrant gradient patches for depth */}
+        <View style={styles.bgPatchTopLeft} />
+        <View style={styles.bgPatchCenter} />
+        <View style={styles.bgPatchBottomRight} />
         {fruits.map((f, i) => (
           <FloatingFruit key={i} {...f} />
         ))}
@@ -347,10 +351,22 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1B6F24' },
+  container: { flex: 1, backgroundColor: '#1A6B22' },
 
   // Animated background
-  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden', backgroundColor: '#228B2E' },
+  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden', backgroundColor: '#1E7B28' },
+  bgPatchTopLeft: {
+    position: 'absolute', top: -SH * 0.12, left: -SW * 0.2, width: SW * 0.85, height: SW * 0.85,
+    borderRadius: SW * 0.45, backgroundColor: 'rgba(46, 125, 50, 0.5)',
+  },
+  bgPatchCenter: {
+    position: 'absolute', top: SH * 0.25, right: -SW * 0.15, width: SW * 0.7, height: SW * 0.7,
+    borderRadius: SW * 0.35, backgroundColor: 'rgba(27, 94, 32, 0.45)',
+  },
+  bgPatchBottomRight: {
+    position: 'absolute', bottom: -SH * 0.08, left: SW * 0.1, width: SW * 0.9, height: SW * 0.6,
+    borderRadius: SW * 0.3, backgroundColor: 'rgba(56, 142, 60, 0.35)',
+  },
 
   content: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg, alignItems: 'center' },
 

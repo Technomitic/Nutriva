@@ -45,20 +45,7 @@ function FloatingFruit({ emoji, delay, startX, duration, size }: { emoji: string
   );
 }
 
-function PulsingGlow() {
-  const pulse = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 3000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 3000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-  const scale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.15] });
-  const opacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.15, 0.3] });
-  return <Animated.View style={[styles.glow, { transform: [{ scale }], opacity }]} />;
-}
+
 
 function useCardEntrance() {
   const translateY = useRef(new Animated.Value(50)).current;
@@ -156,9 +143,9 @@ export default function SignupScreen() {
     return (
       <View style={[styles.container, d.s.screenBg]}>
         <View style={styles.bgLayer}>
-          <View style={styles.bgGradientTop} />
-          <View style={styles.bgGradientBottom} />
-          <PulsingGlow />
+          <View style={styles.bgPatchTopLeft} />
+          <View style={styles.bgPatchCenter} />
+          <View style={styles.bgPatchBottomRight} />
           {fruits.map((f, i) => <FloatingFruit key={i} {...f} />)}
         </View>
         <View style={styles.content}>
@@ -193,9 +180,9 @@ export default function SignupScreen() {
     <View style={[styles.container, { backgroundColor: d.bg }]}>
       {/* Animated Background */}
       <View style={styles.bgLayer}>
-        <View style={styles.bgGradientTop} />
-        <View style={styles.bgGradientBottom} />
-        <PulsingGlow />
+        <View style={styles.bgPatchTopLeft} />
+        <View style={styles.bgPatchCenter} />
+        <View style={styles.bgPatchBottomRight} />
         {fruits.map((f, i) => <FloatingFruit key={i} {...f} />)}
       </View>
 
@@ -337,22 +324,21 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A1F07' },
+  container: { flex: 1, backgroundColor: '#1A6B22' },
 
   // Animated background
-  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden' },
-  bgGradientTop: {
-    position: 'absolute', top: 0, left: 0, right: 0, height: SH * 0.5,
-    backgroundColor: '#0D2709',
+  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden', backgroundColor: '#1E7B28' },
+  bgPatchTopLeft: {
+    position: 'absolute', top: -SH * 0.12, left: -SW * 0.2, width: SW * 0.85, height: SW * 0.85,
+    borderRadius: SW * 0.45, backgroundColor: 'rgba(46, 125, 50, 0.5)',
   },
-  bgGradientBottom: {
-    position: 'absolute', bottom: 0, left: 0, right: 0, height: SH * 0.55,
-    backgroundColor: '#143E12',
-    borderTopLeftRadius: 80, borderTopRightRadius: 80,
+  bgPatchCenter: {
+    position: 'absolute', top: SH * 0.25, right: -SW * 0.15, width: SW * 0.7, height: SW * 0.7,
+    borderRadius: SW * 0.35, backgroundColor: 'rgba(27, 94, 32, 0.45)',
   },
-  glow: {
-    position: 'absolute', top: SH * 0.12, left: SW * 0.1, width: SW * 0.8, height: SW * 0.8,
-    borderRadius: SW * 0.4, backgroundColor: '#1B5E20',
+  bgPatchBottomRight: {
+    position: 'absolute', bottom: -SH * 0.08, left: SW * 0.1, width: SW * 0.9, height: SW * 0.6,
+    borderRadius: SW * 0.3, backgroundColor: 'rgba(56, 142, 60, 0.35)',
   },
 
   content: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg, alignItems: 'center' },
