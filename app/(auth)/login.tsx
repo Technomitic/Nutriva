@@ -63,25 +63,7 @@ function FloatingFruit({ emoji, delay, startX, duration, size }: { emoji: string
   );
 }
 
-// Gentle pulsing glow
-function PulsingGlow() {
-  const pulse = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 3000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 3000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
 
-  const scale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.15] });
-  const opacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.15, 0.3] });
-
-  return (
-    <Animated.View style={[styles.glow, { transform: [{ scale }], opacity }]} />
-  );
-}
 
 // Card entrance animation
 function useCardEntrance() {
@@ -180,9 +162,6 @@ export default function LoginScreen() {
     <View style={[styles.container, d.s.screenBg]}>
       {/* Animated Background */}
       <View style={styles.bgLayer}>
-        <View style={styles.bgGradientTop} />
-        <View style={styles.bgGradientBottom} />
-        <PulsingGlow />
         {fruits.map((f, i) => (
           <FloatingFruit key={i} {...f} />
         ))}
@@ -372,19 +351,6 @@ const styles = StyleSheet.create({
 
   // Animated background
   bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden' },
-  bgGradientTop: {
-    position: 'absolute', top: 0, left: 0, right: 0, height: SH * 0.5,
-    backgroundColor: '#0D2709',
-  },
-  bgGradientBottom: {
-    position: 'absolute', bottom: 0, left: 0, right: 0, height: SH * 0.55,
-    backgroundColor: '#143E12',
-    borderTopLeftRadius: 80, borderTopRightRadius: 80,
-  },
-  glow: {
-    position: 'absolute', top: SH * 0.12, left: SW * 0.1, width: SW * 0.8, height: SW * 0.8,
-    borderRadius: SW * 0.4, backgroundColor: '#1B5E20',
-  },
 
   content: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg, alignItems: 'center' },
 
