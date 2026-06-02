@@ -230,3 +230,30 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================
+-- AUTO-CLEANUP: Delete chat messages 5 days after delivery
+-- Runs daily at 3:00 AM IST (9:30 PM UTC previous day)
+-- ============================================
+
+CREATE OR REPLACE FUNCTION public.cleanup_delivered_chats()
+RETURNS void AS $$
+BEGIN
+  DELETE FROM chat_messages
+  WHERE order_id IN (
+    SELECT id FROM orders
+    WHERE status = 'Delivered'
+      AND updated_at < NOW() - INTERVAL '5 days'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Enable pg_cron extension (already enabled on most Supabase projects)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Schedule daily cleanup at 21:30 UTC (3:00 AM IST)
+SELECT cron.schedule(
+  'cleanup-delivered-chats',
+  '30 21 * * *',
+  'SELECT public.cleanup_delivered_chats()'
+);
