@@ -261,7 +261,7 @@ export default function ChatScreen() {
       // Web can't open UPI deep links — show copy-able info
       if (typeof window !== 'undefined') {
         window.alert(
-          `UPI ID: ${UPI_ID}\nAmount: ₹${payAmount.toLocaleString()}\n\nOpen your UPI app and pay to the above ID.`
+          `UPI ID: ${UPI_ID}\nAmount: ₹${Number(payAmount).toLocaleString()}\n\nOpen your UPI app (Google Pay, PhonePe, Paytm) and pay to the above ID.`
         );
       }
       return;
@@ -339,7 +339,6 @@ export default function ChatScreen() {
 
     // Image message
     if (item.type === 'image') {
-      const isFromAdmin = isAdmin;
       return (
         <View style={[styles.msgBubble, isAdmin ? styles.adminBubble : styles.userBubble, styles.imageBubble]}>
           <Pressable onPress={() => setPreviewImage(item.text)}>
@@ -349,13 +348,6 @@ export default function ChatScreen() {
               resizeMode="cover"
             />
           </Pressable>
-          {/* Show Pay via UPI button on admin-sent images (likely QR codes) */}
-          {isFromAdmin && user?.role !== 'admin' && (
-            <Pressable style={styles.payImageBtn} onPress={() => openUPIPayment()}>
-              <Ionicons name="wallet-outline" size={14} color="#fff" />
-              <Text style={styles.payImageBtnText}>Pay ₹{order?.total?.toLocaleString() || '...'} via UPI</Text>
-            </Pressable>
-          )}
           <Text style={[styles.msgTime, isAdmin && styles.adminTime, { marginTop: 6, marginRight: 4 }]}>
             {formatTime(item.created_at)}
           </Text>
@@ -461,19 +453,6 @@ export default function ChatScreen() {
               style={styles.previewImage}
               resizeMode="contain"
             />
-          )}
-          {/* Pay via UPI button in preview (only for non-admin users) */}
-          {previewImage && user?.role !== 'admin' && order && (
-            <Pressable
-              style={styles.previewPayBtn}
-              onPress={() => {
-                setPreviewImage(null);
-                openUPIPayment();
-              }}
-            >
-              <Ionicons name="wallet" size={20} color="#fff" />
-              <Text style={styles.previewPayBtnText}>Pay ₹{order.total?.toLocaleString()} via UPI</Text>
-            </Pressable>
           )}
         </View>
       </Modal>
