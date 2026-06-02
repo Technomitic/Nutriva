@@ -232,6 +232,25 @@ export default function ChatScreen() {
     }
   };
 
+  /** Admin-only: send a payment request as a QR card message */
+  const sendPaymentRequest = async () => {
+    if (!orderId || !user || !supabase || user.role !== 'admin') return;
+    const amount = order?.total || 0;
+
+    try {
+      await supabase.from('chat_messages').insert({
+        order_id: orderId,
+        sender: 'admin',
+        text: `Payment request for ₹${Number(amount).toLocaleString()}`,
+        type: 'qr',
+        amount: amount > 0 ? String(amount) : null,
+      });
+    } catch (err) {
+      console.error('Payment request error:', err);
+      showToast('Failed to send payment request');
+    }
+  };
+
   const formatTime = (dateStr: string) => {
     try {
       return new Date(dateStr).toLocaleTimeString('en-US', {
@@ -422,6 +441,15 @@ export default function ChatScreen() {
         >
           <Ionicons name="image-outline" size={22} color={uploadingImage ? 'rgba(46,125,50,0.3)' : '#2E7D32'} />
         </Pressable>
+        {/* Admin: Send Payment Request button */}
+        {user?.role === 'admin' && (
+          <Pressable
+            style={styles.payRequestBtn}
+            onPress={sendPaymentRequest}
+          >
+            <Text style={styles.payRequestBtnIcon}>₹</Text>
+          </Pressable>
+        )}
         <TextInput
           style={styles.inputField}
           placeholder="Type a message..."
@@ -555,6 +583,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(46, 125, 50, 0.08)',
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.12)',
+  },
+  payRequestBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(46, 125, 50, 0.12)',
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)',
+  },
+  payRequestBtnIcon: {
+    fontSize: 18, fontWeight: '800', color: '#2E7D32',
   },
   inputField: {
     flex: 1, backgroundColor: 'rgba(46, 125, 50, 0.05)', borderRadius: radius.full,
