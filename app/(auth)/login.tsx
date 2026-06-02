@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A1F07' },
 
   // Animated background
-  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden' },
+  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden', backgroundColor: '#0D2709' },
 
   content: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg, alignItems: 'center' },
 
