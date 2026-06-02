@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, Image, TextInput, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, ScrollView, Pressable, Image, TextInput, StyleSheet, ActivityIndicator, Animated, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../../src/theme';
@@ -103,7 +103,11 @@ export default function CartScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: d.bg }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Header */}
         <Animated.View style={[styles.header, headerAnim]}>
           <Text style={[styles.headerTitle, { color: d.text }]}>{t('cart.title')}</Text>
@@ -213,7 +217,7 @@ export default function CartScreen() {
           </View>
         )}
 
-        <View style={{ height: 160 }} />
+        <View style={{ height: 240 }} />
       </ScrollView>
 
       {/* Fixed Summary */}
@@ -256,7 +260,17 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    ...(Platform.OS === 'web' ? { height: '100vh' as any, maxHeight: '100vh' as any, overflow: 'hidden' as any } : {}),
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    ...(Platform.OS === 'web' ? { overflowY: 'auto' as any } : {}),
+  },
   header: { padding: spacing['2xl'], paddingBottom: spacing.xl },
   headerTitle: { fontSize: 32, fontWeight: '700', letterSpacing: -0.8, marginBottom: 4 },
   headerSub: { fontSize: 14 },
