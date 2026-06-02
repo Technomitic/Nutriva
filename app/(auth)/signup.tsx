@@ -106,6 +106,10 @@ export default function SignupScreen() {
       setError('Please fill in all fields');
       return;
     }
+    if (!phone.trim()) {
+      setError('Please enter your WhatsApp number');
+      return;
+    }
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -229,7 +233,7 @@ export default function SignupScreen() {
               <TextInput
                 ref={phoneRef}
                 style={[styles.input, { backgroundColor: d.inputBg, borderColor: d.inputBorder, color: d.text }]}
-                placeholder="Phone number (optional)"
+                placeholder="Phone number (WhatsApp number)"
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 value={phone}
                 onChangeText={(t) => { setPhone(t); setError(''); }}

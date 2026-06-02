@@ -308,25 +308,8 @@ export default function LoginScreen() {
             {/* Social */}
             <View style={styles.socials}>
               <Pressable
-                style={styles.socialBtn}
-                onPress={async () => {
-                  if (!supabase) {
-                    showToast('Service unavailable');
-                    return;
-                  }
-                  try {
-                    const redirectUrl = Platform.OS === 'web'
-                      ? window.location.origin + '/'
-                      : 'fresh://auth/callback';
-                    const { error: oauthErr } = await supabase.auth.signInWithOAuth({
-                      provider: 'google',
-                      options: { redirectTo: redirectUrl },
-                    });
-                    if (oauthErr) throw oauthErr;
-                  } catch (err: any) {
-                    showToast(err.message || 'Google sign-in failed');
-                  }
-                }}
+                style={[styles.socialBtn, { opacity: 0.4 }]}
+                onPress={() => showToast('Google Sign-In coming soon!')}
               >
                 <Ionicons name="logo-google" size={20} color={colors.onSurface} />
                 <Text style={styles.socialText}>Google</Text>
