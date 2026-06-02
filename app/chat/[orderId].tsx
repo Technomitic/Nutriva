@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, Pressable, FlatList,
   StyleSheet, KeyboardAvoidingView, Platform,
-  Image, ActivityIndicator,
+  Image, ActivityIndicator, Modal, Dimensions,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +28,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const flatListRef = useRef<FlatList>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Subscribe to real-time chat messages
   useEffect(() => {
@@ -259,12 +260,14 @@ export default function ChatScreen() {
     if (item.type === 'image') {
       return (
         <View style={[styles.msgBubble, isAdmin ? styles.adminBubble : styles.userBubble, styles.imageBubble]}>
-          <Image
-            source={{ uri: item.text }}
-            style={styles.chatImage}
-            resizeMode="cover"
-          />
-          <Text style={[styles.msgTime, isAdmin && styles.adminTime]}>
+          <Pressable onPress={() => setPreviewImage(item.text)}>
+            <Image
+              source={{ uri: item.text }}
+              style={styles.chatImage}
+              resizeMode="cover"
+            />
+          </Pressable>
+          <Text style={[styles.msgTime, isAdmin && styles.adminTime, { marginTop: 6, marginRight: 4 }]}>
             {formatTime(item.created_at)}
           </Text>
         </View>
@@ -344,6 +347,27 @@ export default function ChatScreen() {
           <Ionicons name="send" size={20} color={colors.onPrimary} />
         </Pressable>
       </View>
+
+      {/* Full-screen Image Preview */}
+      <Modal
+        visible={!!previewImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreviewImage(null)}
+      >
+        <View style={styles.previewOverlay}>
+          <Pressable style={styles.previewClose} onPress={() => setPreviewImage(null)}>
+            <Ionicons name="close" size={28} color="#fff" />
+          </Pressable>
+          {previewImage && (
+            <Image
+              source={{ uri: previewImage }}
+              style={styles.previewImage}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -387,7 +411,7 @@ const styles = StyleSheet.create({
   systemMsgText: { fontSize: 12, color: 'rgba(27, 60, 18, 0.5)', fontStyle: 'italic' },
   // Image in chat
   chatImage: {
-    width: 200, height: 200, borderRadius: radius.md - 2,
+    width: 260, height: 260, borderRadius: radius.md - 2,
   },
   // QR Card
   qrCard: {
@@ -428,5 +452,20 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: '#2E7D32', alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)',
+  },
+  // Full-screen image preview
+  previewOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.92)',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  previewClose: {
+    position: 'absolute', top: 50, right: 20, zIndex: 10,
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  previewImage: {
+    width: Dimensions.get('window').width - 32,
+    height: Dimensions.get('window').height * 0.7,
   },
 });
