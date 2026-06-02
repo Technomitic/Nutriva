@@ -347,10 +347,10 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A1F07' },
+  container: { flex: 1, backgroundColor: '#1B6F24' },
 
   // Animated background
-  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden', backgroundColor: '#0D2709' },
+  bgLayer: { ...StyleSheet.absoluteFillObject, overflow: 'hidden', backgroundColor: '#228B2E' },
 
   content: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg, alignItems: 'center' },
 
