@@ -420,6 +420,46 @@ export default function AdminScreen() {
     } catch { showToast('Failed to delete'); }
   };
 
+  const handleDeleteCustomer = async (customer: any) => {
+    if (!customer || !supabase) return;
+    if (customer.role === 'admin') {
+      showToast('Cannot delete admin accounts');
+      return;
+    }
+    const doDelete = async () => {
+      try {
+        // Delete user's orders
+        await supabase.from('orders').delete().eq('user_id', customer.id);
+        // Delete user's notifications
+        await supabase.from('notifications').delete().eq('user_id', customer.id);
+        // Delete user's profile
+        const { error } = await supabase.from('profiles').delete().eq('id', customer.id);
+        if (error) throw error;
+        setSelectedCustomer(null);
+        setCustomerOrders([]);
+        showToast(`${customer.name || 'User'} deleted`);
+        // Refresh customers list
+        loadAll();
+      } catch (err: any) {
+        showToast(err.message || 'Failed to delete user');
+      }
+    };
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Delete user "${customer.name || customer.email}"? This will remove their profile and all their orders. This cannot be undone.`)) {
+        doDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete User',
+        `Delete "${customer.name || customer.email}"? This will remove their profile and all their orders. This cannot be undone.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: doDelete },
+        ]
+      );
+    }
+  };
+
   const pickAndUploadImage = async () => {
     if (productImageUrls.length >= 5) {
       showToast('Max 5 images per product');
@@ -1473,6 +1513,17 @@ export default function AdminScreen() {
                       </View>
                     )}
 
+                    {/* Delete User */}
+                    {selectedCustomer?.role !== 'admin' && (
+                      <Pressable
+                        style={s.custDeleteBtn}
+                        onPress={() => handleDeleteCustomer(selectedCustomer)}
+                      >
+                        <Ionicons name="trash-outline" size={16} color="#C62828" />
+                        <Text style={s.custDeleteBtnText}>Delete User</Text>
+                      </Pressable>
+                    )}
+
                     {/* Close */}
                     <Pressable
                       style={s.custModalClose}
@@ -2443,6 +2494,13 @@ const s = StyleSheet.create({
     alignItems: 'center', marginTop: spacing.lg,
   },
   custModalCloseText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  custDeleteBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    paddingVertical: 14, borderRadius: 999, marginTop: spacing.base,
+    backgroundColor: 'rgba(198,40,40,0.06)',
+    borderWidth: 1, borderColor: 'rgba(198,40,40,0.2)',
+  },
+  custDeleteBtnText: { color: '#C62828', fontSize: 14, fontWeight: '700' },
   // Targeted Notification in Customer Modal
   custNotifToggle: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
