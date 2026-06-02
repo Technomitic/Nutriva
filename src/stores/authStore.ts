@@ -158,8 +158,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   signInWithGoogle: async () => {
     if (!supabase) throw new Error('Supabase not configured');
 
+    const { Platform } = require('react-native');
+    const redirectTo =
+      Platform.OS === 'web' && typeof window !== 'undefined'
+        ? window.location.origin
+        : undefined;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: { redirectTo },
     });
     if (error) throw error;
   },
