@@ -3,12 +3,13 @@
  * Dedicated screen: Calendar → Pick products → Choose time → Place advance order
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View, Text, ScrollView, Pressable, Image,
   StyleSheet, ActivityIndicator, Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
 import { products } from '../src/data/products';
@@ -18,6 +19,16 @@ import { useUIStore } from '../src/stores/uiStore';
 import { Product } from '../src/types';
 import { supabase } from '../src/api/supabase';
 import { useDynamic } from '../src/hooks/useDynamic';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const ADDRESSES_KEY = 'fresh-addresses';
+
+interface SavedAddress {
+  id: string;
+  label: string;
+  address: string;
+  isDefault: boolean;
+}
 
 const { width: SW } = Dimensions.get('window');
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -48,6 +59,25 @@ export default function AdvanceOrderScreen() {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
   });
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+
+  // Load saved addresses on focus
+  const loadAddresses = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(ADDRESSES_KEY);
+      setSavedAddresses(stored ? JSON.parse(stored) : []);
+    } catch {
+      setSavedAddresses([]);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadAddresses();
+    }, [loadAddresses])
+  );
+
+  const defaultAddress = savedAddresses.find((a) => a.isDefault) || savedAddresses[0] || null;
 
   // Calendar data
   const calendarDays = useMemo(() => {
@@ -133,6 +163,13 @@ export default function AdvanceOrderScreen() {
     if (cartItems.length === 0 || !selectedDate) return;
     setPlacing(true);
     try {
+      if (!defaultAddress) {
+        showToast('Please add a delivery address first');
+        router.push('/addresses');
+        setPlacing(false);
+        return;
+      }
+
       await placeOrder({
         userId: user.id,
         customerName: user.name,
@@ -141,7 +178,7 @@ export default function AdvanceOrderScreen() {
           return { product_id: id, name: p.name, qty, price: p.price, image: p.image };
         }),
         total: cartTotal,
-        address: user.address || '42 Orchard Lane, Green Valley',
+        address: `${defaultAddress.label}: ${defaultAddress.address}`,
         is_advance: true,
         delivery_date: selectedDate,
         delivery_slot: selectedSlot,

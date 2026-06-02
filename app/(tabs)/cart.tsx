@@ -2,9 +2,10 @@
  * Fresh — Cart / Basket Screen
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, Image, TextInput, StyleSheet, ActivityIndicator, Animated, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../../src/theme';
 import { useCartStore } from '../../src/stores/cartStore';
@@ -15,6 +16,16 @@ import { useCouponStore } from '../../src/stores/couponStore';
 import { useStaggerEntrance, useHeroEntrance, useCardEntrance3D } from '../../src/utils/animations';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import { useT } from '../../src/i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const ADDRESSES_KEY = 'fresh-addresses';
+
+interface SavedAddress {
+  id: string;
+  label: string;
+  address: string;
+  isDefault: boolean;
+}
 
 export default function CartScreen() {
   const router = useRouter();
@@ -29,6 +40,31 @@ export default function CartScreen() {
   const [placing, setPlacing] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoExpanded, setPromoExpanded] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+
+  // Load saved addresses whenever the screen comes into focus
+  // (so if user navigates to Addresses screen and comes back, we pick up changes)
+  const loadAddresses = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(ADDRESSES_KEY);
+      if (stored) {
+        setSavedAddresses(JSON.parse(stored));
+      } else {
+        setSavedAddresses([]);
+      }
+    } catch {
+      setSavedAddresses([]);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadAddresses();
+    }, [loadAddresses])
+  );
+
+  // Derive the default address (or first available)
+  const defaultAddress = savedAddresses.find((a) => a.isDefault) || savedAddresses[0] || null;
 
   // Keep discount in sync whenever the cart subtotal changes
   useEffect(() => {
@@ -50,6 +86,13 @@ export default function CartScreen() {
 
     setPlacing(true);
     try {
+      if (!defaultAddress) {
+        showToast('Please add a delivery address first');
+        router.push('/addresses');
+        setPlacing(false);
+        return;
+      }
+
       const newOrder = await placeOrder({
         userId: user.id,
         customerName: user.name,
@@ -61,7 +104,7 @@ export default function CartScreen() {
           image: i.image,
         })),
         total: finalTotal,
-        address: user.address || '42 Orchard Lane, Green Valley',
+        address: `${defaultAddress.label}: ${defaultAddress.address}`,
         couponCode: appliedCoupon?.code,
         discount: discount,
       });
@@ -146,14 +189,38 @@ export default function CartScreen() {
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: d.text }]}>Delivery Details</Text>
         </View>
-        <View style={[styles.addressCard, styles.addressSelected, { backgroundColor: d.cardBg, borderColor: d.borderBright }]}>
-          <Ionicons name="home" size={20} color={d.accent} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.addressLabel, { color: d.text }]}>Home</Text>
-            <Text style={[styles.addressText, { color: d.textMuted }]}>42 Orchard Lane, Green Valley, CA 90210</Text>
+        {defaultAddress ? (
+          <View style={[styles.addressCard, styles.addressSelected, { backgroundColor: d.cardBg, borderColor: d.borderBright }]}>
+            <Ionicons
+              name={defaultAddress.label.toLowerCase().includes('home') ? 'home' :
+                    defaultAddress.label.toLowerCase().includes('office') ? 'business' : 'location'}
+              size={20}
+              color={d.accent}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.addressLabel, { color: d.text }]}>{defaultAddress.label}</Text>
+              <Text style={[styles.addressText, { color: d.textMuted }]}>{defaultAddress.address}</Text>
+            </View>
+            <Pressable
+              style={styles.changeAddressBtn}
+              onPress={() => router.push('/addresses')}
+            >
+              <Text style={styles.changeAddressText}>Change</Text>
+            </Pressable>
           </View>
-          <Ionicons name="checkmark-circle" size={20} color={d.accent} />
-        </View>
+        ) : (
+          <Pressable
+            style={[styles.addressCard, { backgroundColor: d.cardBg, borderColor: d.borderBright, borderStyle: 'dashed' }]}
+            onPress={() => router.push('/addresses')}
+          >
+            <Ionicons name="location-outline" size={20} color={d.textMuted} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.addressLabel, { color: d.text }]}>No address saved</Text>
+              <Text style={[styles.addressText, { color: d.textMuted }]}>Tap to add a delivery address</Text>
+            </View>
+            <Ionicons name="add-circle-outline" size={20} color={d.accent} />
+          </Pressable>
+        )}
         </Animated.View>
 
         {/* Promo Code */}
@@ -312,6 +379,19 @@ const styles = StyleSheet.create({
   addressSelected: {},
   addressLabel: { fontSize: 14, fontWeight: '600' },
   addressText: { fontSize: 12, marginTop: 2 },
+  changeAddressBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(46, 125, 50, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(46, 125, 50, 0.15)',
+  },
+  changeAddressText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#2E7D32',
+  },
   // Summary
   summary: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
