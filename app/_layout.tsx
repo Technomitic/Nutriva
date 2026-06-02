@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -181,7 +181,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <StatusBar style={useThemeStore.getState().isDark ? 'light' : 'dark'} />
       <AuthGuard>
-        <Slot />
+        <Stack screenOptions={{ headerShown: false }} />
       </AuthGuard>
       <Toast />
     </QueryClientProvider>
