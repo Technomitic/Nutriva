@@ -397,21 +397,21 @@ export default function HomeScreen() {
           <View style={styles.heroTag}>
           <Text style={[styles.heroTagText, isWeb && styles.heroTagTextWeb]}>{heroProduct.tag || t('home.hero_tag')}</Text>
           </View>
-          <Text style={[styles.heroTitle, isWeb && styles.heroTitleWeb]}>{heroProduct.name.split(' ').join('\n')}</Text>
+          <Text style={[styles.heroTitle, isWeb && styles.heroTitleWeb]}>{isWeb ? heroProduct.name : heroProduct.name.split(' ').join('\n')}</Text>
           <Text style={[styles.heroSub, isWeb && styles.heroSubWeb]}>{heroProduct.origin}</Text>
           {isWeb && (
             <View style={styles.heroFeatures}>
               <View style={styles.heroFeaturePill}>
-                <Text style={styles.heroFeatureEmoji}>🌿</Text>
+                <Ionicons name="leaf-outline" size={14} color="rgba(255,255,255,0.8)" />
                 <Text style={styles.heroFeatureText}>Farm Fresh</Text>
               </View>
               <View style={styles.heroFeaturePill}>
-                <Text style={styles.heroFeatureEmoji}>🚚</Text>
+                <Ionicons name="car-outline" size={14} color="rgba(255,255,255,0.8)" />
                 <Text style={styles.heroFeatureText}>Free Delivery</Text>
               </View>
               <View style={styles.heroFeaturePill}>
-                <Text style={styles.heroFeatureEmoji}>✨</Text>
-                <Text style={styles.heroFeatureText}>100% Organic</Text>
+                <Ionicons name="shield-checkmark-outline" size={14} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.heroFeatureText}>Naturally Grown</Text>
               </View>
             </View>
           )}
@@ -488,7 +488,7 @@ export default function HomeScreen() {
             onPress={() => setFilterTag(tag)}
           >
             <Text style={[styles.filterChipText, filterTag === tag && styles.filterChipTextActive, filterTag !== tag && { color: d.textMuted }]}>
-              {tag === 'all' ? `🍎 ${t('home.filter_all')}` : tag.charAt(0) + tag.slice(1).toLowerCase()}
+              {tag === 'all' ? t('home.filter_all') : tag.charAt(0) + tag.slice(1).toLowerCase()}
             </Text>
           </Pressable>
         ))}
@@ -776,9 +776,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
-  },
-  heroFeatureEmoji: {
-    fontSize: 14,
   },
   heroFeatureText: {
     fontSize: 12,
