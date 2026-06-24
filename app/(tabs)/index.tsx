@@ -552,7 +552,9 @@ const styles = StyleSheet.create({
   heroContent: {
     padding: spacing['2xl'],
     paddingTop: 56,
+    paddingRight: 8,
     zIndex: 2,
+    maxWidth: '58%',
   },
   heroTag: {
     alignSelf: 'flex-start',
@@ -569,10 +571,10 @@ const styles = StyleSheet.create({
     color: colors.primaryFixed,
   },
   heroTitle: {
-    fontSize: 44,
+    fontSize: 34,
     fontWeight: '800',
     color: colors.white,
-    lineHeight: 46,
+    lineHeight: 38,
     letterSpacing: -1.2,
     marginBottom: spacing.md,
   },
@@ -598,10 +600,10 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     position: 'absolute',
-    right: -20,
-    top: 10,
-    width: '55%',
-    height: '90%',
+    right: -10,
+    top: 20,
+    width: '50%',
+    height: '85%',
     opacity: 0.9,
   },
   // Search
