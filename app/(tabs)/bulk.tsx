@@ -165,10 +165,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5, color: '#1B3C12' },
   badge: {
-    backgroundColor: 'rgba(124, 58, 85, 0.3)', paddingVertical: 4, paddingHorizontal: 10,
-    borderRadius: radius.full, borderWidth: 1, borderColor: 'rgba(255,176,204,0.2)',
+    backgroundColor: '#2E7D32', paddingVertical: 4, paddingHorizontal: 10,
+    borderRadius: radius.full,
   },
-  badgeText: { fontSize: 10, fontWeight: '700', color: '#FFB0CC', letterSpacing: 0.5 },
+  badgeText: { fontSize: 10, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.5 },
   // Deal Card
   dealCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.7)', borderRadius: 18,
