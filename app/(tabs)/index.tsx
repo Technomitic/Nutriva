@@ -339,6 +339,9 @@ export default function HomeScreen() {
             <Ionicons name="chevron-down" size={14} color={d.textMuted} />
           </Pressable>
 
+          {/* Spacer to push right-side items */}
+          <View style={{ flex: 1 }} />
+
           {/* Search */}
           <View style={[webStyles.searchBar, { backgroundColor: d.inputBg, borderColor: d.inputBorder }]}>
             <Ionicons name="search" size={18} color={d.textDim} />
@@ -481,7 +484,26 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.harvestGrid}>
-          {displayProducts.map((product, idx) => (
+          {displayProducts.length === 0 ? (
+            <View style={styles.emptySearch}>
+              <Ionicons name="search-outline" size={48} color={d.textDim} />
+              <Text style={[styles.emptySearchTitle, { color: d.text }]}>
+                {searchQuery ? `No results for "${searchQuery}"` : 'No products found'}
+              </Text>
+              <Text style={[styles.emptySearchSub, { color: d.textMuted }]}>
+                {searchQuery ? 'Try a different search term or browse all products' : 'Try changing the filter above'}
+              </Text>
+              {(searchQuery || filterTag !== 'all') && (
+                <Pressable
+                  style={styles.emptySearchBtn}
+                  onPress={() => { setSearchQuery(''); setFilterTag('all'); }}
+                >
+                  <Text style={styles.emptySearchBtnText}>Show All Products</Text>
+                </Pressable>
+              )}
+            </View>
+          ) : (
+            displayProducts.map((product, idx) => (
             <Animated.View key={product.id} style={[cardAnims[idx] || {}]}>
             <Pressable
               style={[styles.harvestCard, { backgroundColor: d.cardBg, borderColor: d.border }]}
@@ -506,7 +528,7 @@ export default function HomeScreen() {
                 )}
               </View>
               <View style={styles.freshnessTag}>
-                <Text style={styles.freshnessText}>🟢 {product.freshness}</Text>
+                <Text style={styles.freshnessText}>{product.freshness}</Text>
               </View>
               {productRatings[product.id] && (
                 <View style={styles.cardRating}>
@@ -535,7 +557,8 @@ export default function HomeScreen() {
               </View>
             </Pressable>
             </Animated.View>
-          ))}
+            ))
+          )}
         </View>
       </View>
 
@@ -864,6 +887,40 @@ const styles = StyleSheet.create({
     backgroundColor: glass.btnPrimary,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // Empty Search State
+  emptySearch: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing['4xl'],
+    paddingHorizontal: spacing.xl,
+  },
+  emptySearchTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1B3C12',
+    marginTop: spacing.lg,
+    textAlign: 'center',
+  },
+  emptySearchSub: {
+    fontSize: 13,
+    color: 'rgba(27, 60, 18, 0.5)',
+    marginTop: 6,
+    textAlign: 'center',
+    lineHeight: 19,
+  },
+  emptySearchBtn: {
+    marginTop: spacing.lg,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    backgroundColor: '#2E7D32',
+  },
+  emptySearchBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   // Bulk Banner
   bulkBanner: {
