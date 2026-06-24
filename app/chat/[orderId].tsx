@@ -408,9 +408,9 @@ export default function ChatScreen() {
           <Text style={[styles.headerTitle, d.s.text]}>Order Chat</Text>
           <Text style={styles.headerStatus}>Active</Text>
         </View>
-        <View style={styles.headerAvatar}>
+        <Pressable style={styles.headerAvatar} onPress={() => router.push(`/order/${orderId}` as any)}>
           <Ionicons name="headset" size={22} color={colors.onPrimary} />
-        </View>
+        </Pressable>
       </View>
 
       {/* Messages */}
