@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, Pressable, FlatList, ScrollView,
-  StyleSheet, KeyboardAvoidingView, Platform, Animated,
+  StyleSheet, KeyboardAvoidingView, Platform, Animated, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -343,22 +343,36 @@ export default function SupportScreen() {
   };
 
   // ── Header ──
-  const getHeaderIcon = (): { name: keyof typeof Ionicons.glyphMap; color: string } => {
-    if (screen === 'chat') {
-      if (selectedOrder) return { name: 'receipt', color: '#FFFFFF' };
-      if (selectedTopic) {
-        const topic = TOPICS.find((t) => t.id === selectedTopic.id);
-        const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
-          product: 'leaf', feedback: 'star', other: 'chatbubble-ellipses',
-          order: 'receipt', delivery: 'bicycle',
-        };
-        return { name: iconMap[selectedTopic.id] || 'headset', color: '#FFFFFF' };
-      }
+  const handleHeadsetPress = () => {
+    if (screen === 'chat' && selectedOrder) {
+      // Order/delivery chat → open full chat screen
+      router.push(`/chat/${selectedOrder.id}` as any);
+    } else if (screen === 'chat' && ticketId) {
+      // Ticket chat → show ticket info
+      Alert.alert(
+        'Ticket Info',
+        `Topic: ${selectedTopic?.label || 'Support'}\nStatus: Active\nTicket ID: ${ticketId.slice(0, 8)}...`,
+        [
+          { text: 'Close Ticket', style: 'destructive', onPress: async () => {
+            if (supabase) {
+              await supabase.from('support_tickets').update({ status: 'resolved', updated_at: new Date().toISOString() }).eq('id', ticketId);
+              setTicketId(null);
+              setPendingTopic(null);
+              setScreen('topics');
+            }
+          }},
+          { text: 'OK' },
+        ]
+      );
+    } else {
+      // Topics / pick-order screen → show contact info
+      Alert.alert(
+        'Contact Support',
+        'Need direct help?\n\n📧 support@nutriva.in\n📞 Available Mon–Sat, 9am–6pm',
+        [{ text: 'OK' }]
+      );
     }
-    return { name: 'headset', color: '#FFFFFF' };
   };
-
-  const headerIcon = getHeaderIcon();
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -378,12 +392,9 @@ export default function SupportScreen() {
            ticketId ? 'Active ticket' : pendingTopic ? 'New conversation' : 'Active'}
         </Text>
       </View>
-      <View style={[
-        styles.headerAvatar,
-        screen === 'chat' && selectedTopic ? { backgroundColor: selectedTopic.color } : {},
-      ]}>
-        <Ionicons name={headerIcon.name} size={22} color={headerIcon.color} />
-      </View>
+      <Pressable style={styles.headerAvatar} onPress={handleHeadsetPress}>
+        <Ionicons name="headset" size={22} color="#FFFFFF" />
+      </Pressable>
     </View>
   );
 
