@@ -168,33 +168,13 @@ export default function OrdersScreen() {
                 <Text style={[styles.orderId, { color: d.text }]}>{t('orders.order')} {activeOrder.order_number}</Text>
                 <Text style={[styles.orderAmount, { color: d.textMuted }]}>₹{activeOrder.total?.toLocaleString()}</Text>
               </View>
-              <View style={{ alignItems: 'flex-end', gap: 8 }}>
-                <View style={styles.orderDate}>
-                  <Ionicons name="time-outline" size={14} color={colors.outline} />
-                  <Text style={[styles.orderDateText, { color: d.textMuted }]}>
-                    {new Date(activeOrder.created_at).toLocaleDateString('en-IN', {
-                      day: 'numeric', month: 'short',
-                    })}
-                  </Text>
-                </View>
-                <Pressable
-                  style={styles.chatBtn}
-                  onPress={() => {
-                    // Clear unread for this order when opening chat
-                    setUnreadChatOrderIds((prev) => {
-                      const next = new Set(prev);
-                      next.delete(activeOrder.id);
-                      return next;
-                    });
-                    router.push(`/chat/${activeOrder.id}`);
-                  }}
-                >
-                  <Ionicons name="chatbubble" size={14} color={colors.onPrimary} />
-                  <Text style={styles.chatBtnText}>{t('orders.chat')}</Text>
-                  {unreadChatOrderIds.has(activeOrder.id) && (
-                    <View style={styles.chatBadge} />
-                  )}
-                </Pressable>
+              <View style={styles.orderDate}>
+                <Ionicons name="time-outline" size={14} color={colors.outline} />
+                <Text style={[styles.orderDateText, { color: d.textMuted }]}>
+                  {new Date(activeOrder.created_at).toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'short',
+                  })}
+                </Text>
               </View>
             </View>
 
@@ -239,6 +219,27 @@ export default function OrdersScreen() {
                   </View>
                 );
               })}
+            </View>
+
+            {/* Chat button — bottom right */}
+            <View style={styles.trackingBottom}>
+              <Pressable
+                style={styles.chatBtn}
+                onPress={() => {
+                  setUnreadChatOrderIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(activeOrder.id);
+                    return next;
+                  });
+                  router.push(`/chat/${activeOrder.id}`);
+                }}
+              >
+                <Ionicons name="chatbubble" size={14} color={colors.onPrimary} />
+                <Text style={styles.chatBtnText}>{t('orders.chat')}</Text>
+                {unreadChatOrderIds.has(activeOrder.id) && (
+                  <View style={styles.chatBadge} />
+                )}
+              </Pressable>
             </View>
           </View>
           </Pressable>
@@ -380,8 +381,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2, shadowRadius: 16, elevation: 4,
   },
   trackingTop: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
     marginBottom: spacing.base,
+  },
+  trackingBottom: {
+    flexDirection: 'row', justifyContent: 'flex-end',
+    marginTop: spacing.base, paddingTop: spacing.base,
+    borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.06)',
   },
   orderId: { fontSize: 16, fontWeight: '700' },
   orderAmount: { fontSize: 14, marginTop: 2 },
