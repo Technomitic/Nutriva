@@ -348,29 +348,41 @@ export default function SupportScreen() {
       // Order/delivery chat → open full chat screen
       router.push(`/chat/${selectedOrder.id}` as any);
     } else if (screen === 'chat' && ticketId) {
-      // Ticket chat → show ticket info
-      Alert.alert(
-        'Ticket Info',
-        `Topic: ${selectedTopic?.label || 'Support'}\nStatus: Active\nTicket ID: ${ticketId.slice(0, 8)}...`,
-        [
-          { text: 'Close Ticket', style: 'destructive', onPress: async () => {
-            if (supabase) {
-              await supabase.from('support_tickets').update({ status: 'resolved', updated_at: new Date().toISOString() }).eq('id', ticketId);
-              setTicketId(null);
-              setPendingTopic(null);
-              setScreen('topics');
-            }
-          }},
-          { text: 'OK' },
-        ]
-      );
+      // Ticket chat → show ticket info with option to close
+      const msg = `Topic: ${selectedTopic?.label || 'Support'}\nStatus: Active\nTicket ID: ${ticketId.slice(0, 8)}...`;
+      if (Platform.OS === 'web') {
+        const shouldClose = window.confirm(`${msg}\n\nDo you want to close this ticket?`);
+        if (shouldClose && supabase) {
+          supabase.from('support_tickets').update({ status: 'resolved', updated_at: new Date().toISOString() }).eq('id', ticketId).then(() => {
+            setTicketId(null);
+            setPendingTopic(null);
+            setScreen('topics');
+          });
+        }
+      } else {
+        Alert.alert(
+          'Ticket Info', msg,
+          [
+            { text: 'Close Ticket', style: 'destructive', onPress: async () => {
+              if (supabase) {
+                await supabase.from('support_tickets').update({ status: 'resolved', updated_at: new Date().toISOString() }).eq('id', ticketId);
+                setTicketId(null);
+                setPendingTopic(null);
+                setScreen('topics');
+              }
+            }},
+            { text: 'OK' },
+          ]
+        );
+      }
     } else {
       // Topics / pick-order screen → show contact info
-      Alert.alert(
-        'Contact Support',
-        'Need direct help?\n\n📧 support@nutriva.in\n📞 Available Mon–Sat, 9am–6pm',
-        [{ text: 'OK' }]
-      );
+      const contactMsg = 'Need direct help?\n\n📧 support@nutriva.in\n📞 Available Mon–Sat, 9am–6pm';
+      if (Platform.OS === 'web') {
+        window.alert(contactMsg);
+      } else {
+        Alert.alert('Contact Support', contactMsg, [{ text: 'OK' }]);
+      }
     }
   };
 
