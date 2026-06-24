@@ -2404,11 +2404,11 @@ export default function AdminScreen() {
                   </View>
                 ) : (
                   filtered.map((ticket) => (
-                    <Pressable
+                    <View
                       key={ticket.id}
                       style={[s.card, selectedSupportTicket?.id === ticket.id && { borderColor: colors.primary, borderWidth: 2 }]}
-                      onPress={() => setSelectedSupportTicket(selectedSupportTicket?.id === ticket.id ? null : ticket)}
                     >
+                      <Pressable onPress={() => setSelectedSupportTicket(selectedSupportTicket?.id === ticket.id ? null : ticket)}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                         <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: `${supportTopicColor(ticket.topic)}15`, alignItems: 'center', justifyContent: 'center' }}>
                           <Ionicons
@@ -2431,6 +2431,7 @@ export default function AdminScreen() {
                           </Text>
                         </View>
                       </View>
+                      </Pressable>
 
                       {/* Expanded: show messages + reply */}
                       {selectedSupportTicket?.id === ticket.id && (
@@ -2493,7 +2494,7 @@ export default function AdminScreen() {
                           </Pressable>
                         </View>
                       )}
-                    </Pressable>
+                    </View>
                   ))
                 )}
               </>
