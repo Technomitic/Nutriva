@@ -18,6 +18,7 @@ export interface Product {
   active: boolean;
   is_hero?: boolean;
   is_editors_pick?: boolean;
+  hero_image_url?: string;
   image_url?: string;
   image_urls?: string[];
 }

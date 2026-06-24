@@ -64,6 +64,8 @@ export default function AdminScreen() {
   const [pf, setPf] = useState({ name: '', variety: '', origin: '', price: '', unit: '/kg', tag: '', description: '', stock: '', max_stock: '100', image_url: '' });
   const [imageUploading, setImageUploading] = useState(false);
   const [productImageUrls, setProductImageUrls] = useState<string[]>([]);
+  const [heroImageUrl, setHeroImageUrl] = useState('');
+  const [heroImageUploading, setHeroImageUploading] = useState(false);
   // Bulk state
   const [bulkDeals, setBulkDeals] = useState<any[]>([]);
   const [festivalPacks, setFestivalPacks] = useState<any[]>([]);
@@ -370,6 +372,7 @@ export default function AdminScreen() {
   const resetProductForm = () => {
     setPf({ name: '', variety: '', origin: '', price: '', unit: '/kg', tag: '', description: '', stock: '', max_stock: '100', image_url: '' });
     setProductImageUrls([]);
+    setHeroImageUrl('');
     setEditingProduct(null);
     setShowProductForm(false);
   };
@@ -382,6 +385,7 @@ export default function AdminScreen() {
       image_url: prod.image_url || '',
     });
     setProductImageUrls(prod.image_urls || []);
+    setHeroImageUrl(prod.hero_image_url || '');
     setEditingProduct(prod.id);
     setShowProductForm(true);
   };
@@ -397,6 +401,7 @@ export default function AdminScreen() {
       max_stock: parseInt(pf.max_stock) || 100,
       image_url: primaryImage,
       image_urls: productImageUrls,
+      hero_image_url: heroImageUrl.trim() || null,
     };
     try {
       if (editingProduct) {
@@ -585,6 +590,103 @@ export default function AdminScreen() {
       showToast(`Upload error: ${err.message || 'Unknown error'}`);
     } finally {
       setImageUploading(false);
+    }
+  };
+
+  /** Upload a separate hero banner image for the hero section */
+  const pickAndUploadHeroImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets?.[0]) return;
+
+      const asset = result.assets[0];
+      setHeroImageUploading(true);
+
+      if (!supabase) {
+        showToast('Supabase not configured');
+        setHeroImageUploading(false);
+        return;
+      }
+
+      const mimeToExt: Record<string, string> = {
+        'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
+      };
+      const ext = mimeToExt[asset.mimeType || ''] || 'jpg';
+      const fileName = `hero_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const filePath = `products/${fileName}`;
+
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token || supabaseKey;
+
+      let uploadOk = false;
+
+      if (Platform.OS === 'web') {
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+        const formData = new FormData();
+        formData.append('', blob, `hero.${ext}`);
+
+        const uploadRes = await fetch(
+          `${supabaseUrl}/storage/v1/object/product-images/${filePath}`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'apikey': supabaseKey || '',
+              'x-upsert': 'true',
+            },
+            body: formData,
+          }
+        );
+        uploadOk = uploadRes.ok;
+        if (!uploadOk) {
+          showToast('Hero image upload failed');
+          setHeroImageUploading(false);
+          return;
+        }
+      } else {
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+        const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as ArrayBuffer);
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(blob);
+        });
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, arrayBuffer, {
+            contentType: asset.mimeType || `image/${ext}`,
+            upsert: true,
+          });
+        if (uploadError) {
+          showToast(`Hero upload failed: ${uploadError.message}`);
+          setHeroImageUploading(false);
+          return;
+        }
+        uploadOk = true;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      if (urlData?.publicUrl) {
+        setHeroImageUrl(urlData.publicUrl);
+        showToast('Hero image uploaded! ✓');
+      }
+    } catch (err: any) {
+      showToast(`Upload error: ${err.message || 'Unknown error'}`);
+    } finally {
+      setHeroImageUploading(false);
     }
   };
 
@@ -1168,6 +1270,53 @@ export default function AdminScreen() {
                         <Text style={s.imagePlaceholderText}>No images — upload up to 5 photos</Text>
                       </View>
                     )}
+                  </View>
+                  {/* Hero Banner Image (separate from product images) */}
+                  <View style={s.imageUrlSection}>
+                    <Text style={s.imageUrlLabel}>🖼️ Hero Banner Image (optional)</Text>
+                    <Text style={{ fontSize: 11, color: colors.outline, marginBottom: 8 }}>
+                      A separate image shown on the hero section. If not set, the product image is used.
+                    </Text>
+                    {heroImageUrl ? (
+                      <View style={{ marginBottom: 10 }}>
+                        <View style={s.imagePreview}>
+                          <Image source={{ uri: heroImageUrl }} style={s.imagePreviewImg} resizeMode="cover" />
+                          <Pressable
+                            style={s.imageRemoveBtn}
+                            onPress={() => setHeroImageUrl('')}
+                          >
+                            <Ionicons name="close-circle" size={22} color={colors.error} />
+                          </Pressable>
+                        </View>
+                      </View>
+                    ) : null}
+                    <View style={s.imageActions}>
+                      <Pressable
+                        style={[s.imageUploadBtn, heroImageUploading && { opacity: 0.6 }]}
+                        onPress={pickAndUploadHeroImage}
+                        disabled={heroImageUploading}
+                      >
+                        {heroImageUploading ? (
+                          <ActivityIndicator size="small" color={colors.onPrimary} />
+                        ) : (
+                          <Ionicons name="image-outline" size={18} color={colors.onPrimary} />
+                        )}
+                        <Text style={s.imageUploadBtnText}>
+                          {heroImageUploading ? 'Uploading...' : 'Upload Hero Image'}
+                        </Text>
+                      </Pressable>
+                      <Text style={s.imageOrText}>or</Text>
+                      <View style={{ flex: 1 }}>
+                        <TextInput
+                          style={[s.prodFormInput, { marginBottom: 0 }]}
+                          placeholder="Paste hero image URL"
+                          value={heroImageUrl}
+                          onChangeText={setHeroImageUrl}
+                          placeholderTextColor={colors.outline}
+                          autoCapitalize="none"
+                        />
+                      </View>
+                    </View>
                   </View>
                   <View style={s.prodFormActions}>
                     <Pressable style={s.prodFormCancel} onPress={resetProductForm}>

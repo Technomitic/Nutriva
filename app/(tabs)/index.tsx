@@ -409,7 +409,13 @@ export default function HomeScreen() {
             <Text style={styles.heroCtaText}>₹{heroProduct.price}{heroProduct.unit}</Text>
           </Pressable>
         </View>
-        {heroProduct.image ? (
+        {heroProduct.hero_image_url ? (
+          <Animated.Image
+            source={{ uri: heroProduct.hero_image_url }}
+            style={[styles.heroImage, heroFloat]}
+            resizeMode="contain"
+          />
+        ) : heroProduct.image ? (
           <Animated.Image
             source={heroProduct.image}
             style={[styles.heroImage, heroFloat]}
