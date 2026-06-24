@@ -392,21 +392,37 @@ export default function HomeScreen() {
 
       {/* ===== HERO ===== */}
       <Pressable onPress={() => router.push(`/product/${heroProduct.id}`)}>
-      <Animated.View style={[styles.hero, heroAnim]}>
-        <View style={styles.heroContent}>
+      <Animated.View style={[styles.hero, heroAnim, isWeb && styles.heroWeb]}>
+        <View style={[styles.heroContent, isWeb && styles.heroContentWeb]}>
           <View style={styles.heroTag}>
-          <Text style={styles.heroTagText}>{heroProduct.tag || t('home.hero_tag')}</Text>
+          <Text style={[styles.heroTagText, isWeb && styles.heroTagTextWeb]}>{heroProduct.tag || t('home.hero_tag')}</Text>
           </View>
-          <Text style={styles.heroTitle}>{heroProduct.name.split(' ').join('\n')}</Text>
-          <Text style={styles.heroSub}>{heroProduct.origin}</Text>
+          <Text style={[styles.heroTitle, isWeb && styles.heroTitleWeb]}>{heroProduct.name.split(' ').join('\n')}</Text>
+          <Text style={[styles.heroSub, isWeb && styles.heroSubWeb]}>{heroProduct.origin}</Text>
+          {isWeb && (
+            <View style={styles.heroFeatures}>
+              <View style={styles.heroFeaturePill}>
+                <Text style={styles.heroFeatureEmoji}>🌿</Text>
+                <Text style={styles.heroFeatureText}>Farm Fresh</Text>
+              </View>
+              <View style={styles.heroFeaturePill}>
+                <Text style={styles.heroFeatureEmoji}>🚚</Text>
+                <Text style={styles.heroFeatureText}>Free Delivery</Text>
+              </View>
+              <View style={styles.heroFeaturePill}>
+                <Text style={styles.heroFeatureEmoji}>✨</Text>
+                <Text style={styles.heroFeatureText}>100% Organic</Text>
+              </View>
+            </View>
+          )}
           <Pressable
-            style={styles.heroCta}
+            style={[styles.heroCta, isWeb && styles.heroCtaWeb]}
             onPress={(e) => { e.stopPropagation?.(); handleAddToCart(heroProduct); }}
           >
-            <View style={styles.heroCtaCircle}>
-              <Ionicons name="add" size={16} color="#FFFFFF" />
+            <View style={[styles.heroCtaCircle, isWeb && styles.heroCtaCircleWeb]}>
+              <Ionicons name="add" size={isWeb ? 18 : 16} color="#FFFFFF" />
             </View>
-            <Text style={styles.heroCtaText}>₹{heroProduct.price}{heroProduct.unit}</Text>
+            <Text style={[styles.heroCtaText, isWeb && styles.heroCtaTextWeb]}>₹{heroProduct.price}{heroProduct.unit}</Text>
           </Pressable>
         </View>
         {heroProduct.hero_image_url ? (
@@ -686,12 +702,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: glass.cardBorder,
   },
+  heroWeb: {
+    minHeight: 380,
+    borderRadius: 28,
+    margin: spacing.lg,
+  },
   heroContent: {
     padding: spacing['2xl'],
     paddingTop: 56,
     paddingRight: 8,
     zIndex: 2,
     maxWidth: '58%',
+  },
+  heroContentWeb: {
+    paddingTop: 48,
+    padding: 40,
+    maxWidth: '55%',
   },
   heroTag: {
     alignSelf: 'flex-start',
@@ -707,6 +733,10 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     color: colors.primaryFixed,
   },
+  heroTagTextWeb: {
+    fontSize: 12,
+    letterSpacing: 1.5,
+  },
   heroTitle: {
     fontSize: 34,
     fontWeight: '800',
@@ -715,10 +745,46 @@ const styles = StyleSheet.create({
     letterSpacing: -1.2,
     marginBottom: spacing.md,
   },
+  heroTitleWeb: {
+    fontSize: 52,
+    lineHeight: 56,
+    letterSpacing: -2,
+    marginBottom: spacing.lg,
+  },
   heroSub: {
     color: colors.primaryFixedDim,
     fontSize: 14,
     marginBottom: spacing.xl,
+  },
+  heroSubWeb: {
+    fontSize: 16,
+    marginBottom: spacing.lg,
+  },
+  heroFeatures: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: spacing.xl,
+    flexWrap: 'wrap',
+  },
+  heroFeaturePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  heroFeatureEmoji: {
+    fontSize: 14,
+  },
+  heroFeatureText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+    letterSpacing: 0.3,
   },
   heroCta: {
     flexDirection: 'row',
@@ -731,6 +797,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignSelf: 'flex-start',
   },
+  heroCtaWeb: {
+    paddingVertical: 10,
+    paddingLeft: 10,
+    paddingRight: 24,
+    gap: 12,
+  },
   heroCtaCircle: {
     width: 30,
     height: 30,
@@ -739,10 +811,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  heroCtaCircleWeb: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
   heroCtaText: {
     color: colors.primary,
     fontWeight: '700',
     fontSize: 15,
+  },
+  heroCtaTextWeb: {
+    fontSize: 17,
   },
   heroImage: {
     position: 'absolute',
