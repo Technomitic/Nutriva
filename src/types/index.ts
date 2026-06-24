@@ -185,6 +185,23 @@ export interface Coupon {
   active: boolean;
 }
 
+export interface SupportTicket {
+  id: string;
+  user_id: string;
+  user_name: string;
+  topic: 'product' | 'feedback' | 'other';
+  status: 'open' | 'resolved';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupportMessage {
+  id: string;
+  ticket_id: string;
+  sender: 'user' | 'admin' | 'system';
+  text: string;
+  created_at: string;
+}
+
 // Admin role is managed SERVER-SIDE only via the handle_new_user() trigger
 // in Supabase. Never determine admin status on the client.
-

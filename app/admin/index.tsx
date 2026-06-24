@@ -3,7 +3,7 @@
  * Full admin panel with internal tab navigation
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator,
   TextInput, Platform, Alert, Image, Modal,
@@ -20,7 +20,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AnalyticsSection from '../../src/components/admin/AnalyticsSection';
 import { useDynamic } from '../../src/hooks/useDynamic';
 
-type AdminTab = 'dashboard' | 'orders' | 'products' | 'customers' | 'delivery' | 'bulk' | 'promos' | 'about';
+type AdminTab = 'dashboard' | 'orders' | 'products' | 'customers' | 'delivery' | 'bulk' | 'promos' | 'support' | 'about';
 
 const TABS: { id: AdminTab; label: string; icon: string }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'pulse' },
@@ -30,6 +30,7 @@ const TABS: { id: AdminTab; label: string; icon: string }[] = [
   { id: 'customers', label: 'Customers', icon: 'people' },
   { id: 'delivery', label: 'Delivery', icon: 'bicycle' },
   { id: 'promos', label: 'Promos', icon: 'pricetag' },
+  { id: 'support', label: 'Support', icon: 'headset' },
   { id: 'about', label: 'About', icon: 'information-circle' },
 ];
 
@@ -2291,6 +2292,216 @@ export default function AdminScreen() {
               )}
             </>
           )}
+
+          {/* ═══ SUPPORT TICKETS ═══ */}
+          {activeTab === 'support' && (() => {
+            const [tickets, setTickets] = React.useState<any[]>([]);
+            const [selectedTicket, setSelectedTicket] = React.useState<any>(null);
+            const [ticketMessages, setTicketMessages] = React.useState<any[]>([]);
+            const [replyInput, setReplyInput] = React.useState('');
+            const [ticketFilter, setTicketFilter] = React.useState<'open' | 'resolved' | 'all'>('open');
+
+            React.useEffect(() => {
+              if (!supabase) return;
+              const fetchTickets = async () => {
+                const { data } = await supabase
+                  .from('support_tickets')
+                  .select('*')
+                  .order('updated_at', { ascending: false });
+                if (data) setTickets(data);
+              };
+              fetchTickets();
+
+              const channel = supabase
+                .channel('admin-support-tickets')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, () => { fetchTickets(); })
+                .subscribe();
+              return () => { supabase.removeChannel(channel); };
+            }, []);
+
+            React.useEffect(() => {
+              if (!selectedTicket || !supabase) return;
+              const fetchMsgs = async () => {
+                const { data } = await supabase
+                  .from('support_messages')
+                  .select('*')
+                  .eq('ticket_id', selectedTicket.id)
+                  .order('created_at', { ascending: true });
+                if (data) setTicketMessages(data);
+              };
+              fetchMsgs();
+
+              const channel = supabase
+                .channel(`admin-ticket-msgs-${selectedTicket.id}`)
+                .on('postgres_changes', {
+                  event: 'INSERT', schema: 'public', table: 'support_messages',
+                  filter: `ticket_id=eq.${selectedTicket.id}`,
+                }, (payload) => {
+                  setTicketMessages((prev) => {
+                    if (prev.some((m) => m.id === (payload.new as any).id)) return prev;
+                    return [...prev, payload.new];
+                  });
+                })
+                .subscribe();
+              return () => { supabase.removeChannel(channel); };
+            }, [selectedTicket?.id]);
+
+            const sendReply = async () => {
+              const text = replyInput.trim();
+              if (!text || !selectedTicket || !supabase) return;
+              setReplyInput('');
+              await supabase.from('support_messages').insert({
+                ticket_id: selectedTicket.id,
+                sender: 'admin',
+                text,
+              });
+              await supabase.from('support_tickets').update({ updated_at: new Date().toISOString() }).eq('id', selectedTicket.id);
+            };
+
+            const resolveTicket = async (ticketId: string) => {
+              if (!supabase) return;
+              await supabase.from('support_tickets').update({ status: 'resolved', updated_at: new Date().toISOString() }).eq('id', ticketId);
+              setTickets((prev) => prev.map((t) => t.id === ticketId ? { ...t, status: 'resolved' } : t));
+              if (selectedTicket?.id === ticketId) setSelectedTicket({ ...selectedTicket, status: 'resolved' });
+              showToast('Ticket resolved');
+            };
+
+            const reopenTicket = async (ticketId: string) => {
+              if (!supabase) return;
+              await supabase.from('support_tickets').update({ status: 'open', updated_at: new Date().toISOString() }).eq('id', ticketId);
+              setTickets((prev) => prev.map((t) => t.id === ticketId ? { ...t, status: 'open' } : t));
+              if (selectedTicket?.id === ticketId) setSelectedTicket({ ...selectedTicket, status: 'open' });
+              showToast('Ticket reopened');
+            };
+
+            const topicLabel = (t: string) => t === 'product' ? 'Product Info' : t === 'feedback' ? 'Feedback' : 'Something Else';
+            const topicColor = (t: string) => t === 'product' ? '#43A047' : t === 'feedback' ? '#6A1B9A' : '#00838F';
+            const filtered = ticketFilter === 'all' ? tickets : tickets.filter((t) => t.status === ticketFilter);
+
+            const formatDate = (d: string) => {
+              try { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }); }
+              catch { return ''; }
+            };
+
+            return (
+              <>
+                <Text style={[s.sectionTitle, d.s.text]}>Support Tickets</Text>
+
+                {/* Filters */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.lg, flexGrow: 0 }}>
+                  {(['open', 'resolved', 'all'] as const).map((f) => (
+                    <Pressable key={f} style={[s.filterChip, ticketFilter === f && s.filterChipActive]} onPress={() => setTicketFilter(f)}>
+                      <Text style={[s.filterChipText, ticketFilter === f && s.filterChipTextActive]}>
+                        {f === 'open' ? `🟢 Open (${tickets.filter((t) => t.status === 'open').length})` :
+                         f === 'resolved' ? `✅ Resolved (${tickets.filter((t) => t.status === 'resolved').length})` :
+                         `All (${tickets.length})`}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+
+                {filtered.length === 0 ? (
+                  <View style={s.emptySection}>
+                    <Ionicons name="chatbubbles-outline" size={48} color="rgba(27,60,18,0.15)" />
+                    <Text style={s.emptyText}>No {ticketFilter !== 'all' ? ticketFilter : ''} tickets</Text>
+                  </View>
+                ) : (
+                  filtered.map((ticket) => (
+                    <Pressable
+                      key={ticket.id}
+                      style={[s.card, selectedTicket?.id === ticket.id && { borderColor: colors.primary, borderWidth: 2 }]}
+                      onPress={() => setSelectedTicket(selectedTicket?.id === ticket.id ? null : ticket)}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: `${topicColor(ticket.topic)}15`, alignItems: 'center', justifyContent: 'center' }}>
+                          <Ionicons
+                            name={ticket.topic === 'product' ? 'leaf-outline' : ticket.topic === 'feedback' ? 'star-outline' : 'chatbubble-ellipses-outline'}
+                            size={20} color={topicColor(ticket.topic)}
+                          />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <Text style={[s.cardTitle, d.s.text]}>{ticket.user_name || 'User'}</Text>
+                            <View style={{ backgroundColor: `${topicColor(ticket.topic)}18`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 }}>
+                              <Text style={{ fontSize: 10, fontWeight: '600', color: topicColor(ticket.topic) }}>{topicLabel(ticket.topic)}</Text>
+                            </View>
+                          </View>
+                          <Text style={[s.cardSub, { marginTop: 2 }]}>{formatDate(ticket.updated_at || ticket.created_at)}</Text>
+                        </View>
+                        <View style={{ backgroundColor: ticket.status === 'open' ? 'rgba(46,125,50,0.1)' : 'rgba(0,0,0,0.06)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+                          <Text style={{ fontSize: 11, fontWeight: '600', color: ticket.status === 'open' ? '#2E7D32' : '#888' }}>
+                            {ticket.status === 'open' ? 'Open' : 'Resolved'}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Expanded: show messages + reply */}
+                      {selectedTicket?.id === ticket.id && (
+                        <View style={{ marginTop: spacing.lg, borderTopWidth: 1, borderTopColor: 'rgba(46,125,50,0.08)', paddingTop: spacing.lg }}>
+                          {/* Messages */}
+                          <View style={{ maxHeight: 300 }}>
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                              {ticketMessages.map((msg) => {
+                                if (msg.sender === 'system') {
+                                  return (
+                                    <View key={msg.id} style={{ alignItems: 'center', marginVertical: 6 }}>
+                                      <Text style={{ fontSize: 11, color: 'rgba(27,60,18,0.4)', fontStyle: 'italic' }}>{msg.text}</Text>
+                                    </View>
+                                  );
+                                }
+                                const isAdmin = msg.sender === 'admin';
+                                return (
+                                  <View key={msg.id} style={{
+                                    alignSelf: isAdmin ? 'flex-end' : 'flex-start',
+                                    maxWidth: '75%',
+                                    backgroundColor: isAdmin ? '#2E7D32' : 'rgba(255,255,255,0.7)',
+                                    borderRadius: 14, padding: 10, marginBottom: 8,
+                                    borderWidth: isAdmin ? 0 : 1, borderColor: 'rgba(46,125,50,0.1)',
+                                  }}>
+                                    <Text style={{ fontSize: 13, color: isAdmin ? '#fff' : '#2E4A26', lineHeight: 18 }}>{msg.text}</Text>
+                                    <Text style={{ fontSize: 9, color: isAdmin ? 'rgba(255,255,255,0.6)' : 'rgba(27,60,18,0.35)', marginTop: 4, alignSelf: 'flex-end' }}>
+                                      {formatDate(msg.created_at)}
+                                    </Text>
+                                  </View>
+                                );
+                              })}
+                              {ticketMessages.length === 0 && (
+                                <Text style={{ fontSize: 12, color: 'rgba(27,60,18,0.4)', textAlign: 'center', paddingVertical: 20 }}>No messages yet</Text>
+                              )}
+                            </ScrollView>
+                          </View>
+
+                          {/* Reply input */}
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.base }}>
+                            <TextInput
+                              style={[s.input, { flex: 1 }]}
+                              placeholder="Type admin reply..."
+                              placeholderTextColor="rgba(27,60,18,0.3)"
+                              value={replyInput}
+                              onChangeText={setReplyInput}
+                              onSubmitEditing={sendReply}
+                            />
+                            <Pressable style={[s.primaryBtn, { paddingHorizontal: 16, paddingVertical: 10 }]} onPress={sendReply}>
+                              <Ionicons name="send" size={18} color="#fff" />
+                            </Pressable>
+                          </View>
+
+                          {/* Resolve / Reopen */}
+                          <Pressable
+                            style={[s.primaryBtn, { marginTop: spacing.base, backgroundColor: ticket.status === 'open' ? '#43A047' : '#FF9800' }]}
+                            onPress={() => ticket.status === 'open' ? resolveTicket(ticket.id) : reopenTicket(ticket.id)}
+                          >
+                            <Ionicons name={ticket.status === 'open' ? 'checkmark-circle' : 'refresh'} size={18} color="#fff" />
+                            <Text style={s.primaryBtnText}>{ticket.status === 'open' ? 'Mark as Resolved' : 'Reopen Ticket'}</Text>
+                          </Pressable>
+                        </View>
+                      )}
+                    </Pressable>
+                  ))
+                )}
+              </>
+            );
+          })()}
 
           {/* ═══ ABOUT EDITOR ═══ */}
           {activeTab === 'about' && (() => {

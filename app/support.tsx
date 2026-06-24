@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
 import { useAuthStore } from '../src/stores/authStore';
 import { useOrderStore } from '../src/stores/orderStore';
-import { ChatMessage, Order } from '../src/types';
+import { ChatMessage, Order, SupportTicket, SupportMessage } from '../src/types';
 import { supabase } from '../src/api/supabase';
 import { useDynamic } from '../src/hooks/useDynamic';
 
@@ -80,6 +80,7 @@ export default function SupportScreen() {
   const [input, setInput] = useState('');
   const flatListRef = useRef<FlatList>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [ticketId, setTicketId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.id) fetchOrders(user.id);
@@ -96,76 +97,183 @@ export default function SupportScreen() {
 
   // If we have an order selected, fetch chat messages for it
   useEffect(() => {
-    if (screen !== 'chat' || !selectedOrder || !supabase) return;
+    if (screen !== 'chat') return;
 
-    const fetchMessages = async () => {
-      const { data } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('order_id', selectedOrder.id)
-        .order('created_at', { ascending: true });
-      if (data) setMessages(data);
-    };
-    fetchMessages();
+    // Order-based chat (existing system)
+    if (selectedOrder && supabase) {
+      const fetchMessages = async () => {
+        const { data } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('order_id', selectedOrder.id)
+          .order('created_at', { ascending: true });
+        if (data) setMessages(data);
+      };
+      fetchMessages();
 
-    // Real-time subscription
-    const channel = supabase
-      .channel(`support-${selectedOrder.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `order_id=eq.${selectedOrder.id}`,
-        },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as ChatMessage]);
+      const channel = supabase
+        .channel(`support-${selectedOrder.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'chat_messages',
+            filter: `order_id=eq.${selectedOrder.id}`,
+          },
+          (payload) => {
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === (payload.new as any).id)) return prev;
+              return [...prev, payload.new as ChatMessage];
+            });
+          }
+        )
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    }
+
+    // Ticket-based chat (support tickets)
+    if (ticketId && supabase) {
+      const fetchTicketMessages = async () => {
+        const { data } = await supabase
+          .from('support_messages')
+          .select('*')
+          .eq('ticket_id', ticketId)
+          .order('created_at', { ascending: true });
+        if (data && data.length > 0) {
+          const mapped: ChatMessage[] = data.map((m: any) => ({
+            id: m.id,
+            order_id: '',
+            sender: m.sender,
+            text: m.text,
+            type: 'text' as const,
+            created_at: m.created_at,
+          }));
+          setMessages(mapped);
         }
-      )
-      .subscribe();
+      };
+      fetchTicketMessages();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [screen, selectedOrder]);
+      const channel = supabase
+        .channel(`support-ticket-${ticketId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'support_messages',
+            filter: `ticket_id=eq.${ticketId}`,
+          },
+          (payload) => {
+            const m = payload.new as any;
+            const mapped: ChatMessage = {
+              id: m.id,
+              order_id: '',
+              sender: m.sender,
+              text: m.text,
+              type: 'text',
+              created_at: m.created_at,
+            };
+            setMessages((prev) => {
+              if (prev.some((msg) => msg.id === m.id)) return prev;
+              return [...prev, mapped];
+            });
+          }
+        )
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [screen, selectedOrder, ticketId]);
 
   // Auto scroll
   useEffect(() => {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
-  const handleTopicPress = (topic: SupportTopic) => {
+  const handleTopicPress = async (topic: SupportTopic) => {
     setSelectedTopic(topic);
     fadeAnim.setValue(0);
 
     if (topic.id === 'order' || topic.id === 'delivery') {
-      // Show order picker
       setScreen('pick-order');
-    } else {
-      // Go straight to chat with a welcome message
-      setMessages([
-        {
-          id: 'welcome',
-          order_id: '',
-          sender: 'system',
-          text: `You selected: ${topic.label}. How can we help you today?`,
-          type: 'text',
-          created_at: new Date().toISOString(),
-        },
-      ]);
-      setScreen('chat');
+      return;
     }
+
+    // For ticket-based topics: check for existing open ticket or create new
+    if (!supabase || !user) {
+      // No Supabase — fallback to local
+      setMessages([{
+        id: 'welcome', order_id: '', sender: 'system',
+        text: `You selected: ${topic.label}. How can we help you today?`,
+        type: 'text', created_at: new Date().toISOString(),
+      }]);
+      setScreen('chat');
+      return;
+    }
+
+    // Check for existing open ticket for this topic
+    const { data: existing } = await supabase
+      .from('support_tickets')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('topic', topic.id)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      // Resume existing ticket
+      setTicketId(existing[0].id);
+      setScreen('chat');
+      return;
+    }
+
+    // Create new ticket
+    const { data: newTicket, error } = await supabase
+      .from('support_tickets')
+      .insert({
+        user_id: user.id,
+        user_name: user.name || user.email || 'User',
+        topic: topic.id,
+        status: 'open',
+      })
+      .select('id')
+      .single();
+
+    if (error || !newTicket) {
+      setMessages([{
+        id: 'error', order_id: '', sender: 'system',
+        text: 'Failed to create support ticket. Please try again.',
+        type: 'text', created_at: new Date().toISOString(),
+      }]);
+      setScreen('chat');
+      return;
+    }
+
+    setTicketId(newTicket.id);
+
+    // Insert welcome system message
+    await supabase.from('support_messages').insert({
+      ticket_id: newTicket.id,
+      sender: 'system',
+      text: `You selected: ${topic.label}. How can we help you today?`,
+    });
+
+    setScreen('chat');
   };
 
   const handleOrderPick = (order: Order) => {
     setSelectedOrder(order);
+    setTicketId(null);
     fadeAnim.setValue(0);
     setScreen('chat');
   };
 
   const handleSkipOrderPick = () => {
     setSelectedOrder(null);
+    setTicketId(null);
     fadeAnim.setValue(0);
     setMessages([
       {
@@ -185,6 +293,7 @@ export default function SupportScreen() {
     if (screen === 'chat' && (selectedTopic?.id === 'order' || selectedTopic?.id === 'delivery')) {
       setScreen('pick-order');
     } else if (screen === 'chat' || screen === 'pick-order') {
+      setTicketId(null);
       setScreen('topics');
     } else {
       router.back();
@@ -209,20 +318,30 @@ export default function SupportScreen() {
     };
     setMessages((prev) => [...prev, tempMsg]);
 
-    // If we have a selected order, save to Supabase
-    if (selectedOrder && supabase) {
+    if (supabase) {
       try {
-        await supabase.from('chat_messages').insert({
-          order_id: selectedOrder.id,
-          sender,
-          text,
-          type: 'text',
-        });
+        if (selectedOrder) {
+          // Order-based chat
+          await supabase.from('chat_messages').insert({
+            order_id: selectedOrder.id,
+            sender,
+            text,
+            type: 'text',
+          });
+        } else if (ticketId) {
+          // Ticket-based chat
+          await supabase.from('support_messages').insert({
+            ticket_id: ticketId,
+            sender,
+            text,
+          });
+          // Update ticket timestamp
+          await supabase.from('support_tickets').update({ updated_at: new Date().toISOString() }).eq('id', ticketId);
+        }
       } catch (err) {
         console.error('Support send error:', err);
       }
     }
-    // For general topics (no order), messages stay local for now
   };
 
   const formatTime = (dateStr: string) => {
