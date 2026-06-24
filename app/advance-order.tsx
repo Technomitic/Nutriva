@@ -134,7 +134,7 @@ export default function AdvanceOrderScreen() {
       if (data && data.length > 0) {
         const merged = data.map((dbProd: any) => {
           const local = products.find((p) => p.id === dbProd.id);
-          return { ...dbProd, image: local?.image || products[0].image } as Product;
+          return { ...dbProd, image: local?.image || null } as Product;
         });
         setActiveProducts(merged);
       }
@@ -325,7 +325,13 @@ export default function AdvanceOrderScreen() {
                 return (
                   <View key={product.id} style={s.prodCard}>
                     <View style={s.prodImgWrap}>
-                      <Image source={product.image} style={s.prodImg} resizeMode="contain" />
+                      {product.image ? (
+                        <Image source={product.image} style={s.prodImg} resizeMode="contain" />
+                      ) : product.image_url ? (
+                        <Image source={{ uri: product.image_url }} style={s.prodImg} resizeMode="contain" />
+                      ) : (
+                        <Ionicons name="leaf-outline" size={28} color="rgba(46,125,50,0.2)" />
+                      )}
                     </View>
                     <Text style={s.prodName} numberOfLines={1}>{product.name}</Text>
                     <Text style={s.prodPrice}>₹{product.price}{product.unit}</Text>
@@ -381,10 +387,19 @@ export default function AdvanceOrderScreen() {
 
             <Text style={s.reviewItemsTitle}>Order Items</Text>
             {cartItems.map(([id, qty]) => {
-              const p = products.find((pr) => pr.id === id)!;
+              const p = activeProducts.find((pr) => pr.id === id) || products.find((pr) => pr.id === id);
+              if (!p) return null;
               return (
                 <View key={id} style={s.reviewItem}>
-                  <Image source={p.image} style={s.reviewItemImg} resizeMode="contain" />
+                  {p.image ? (
+                    <Image source={p.image} style={s.reviewItemImg} resizeMode="contain" />
+                  ) : p.image_url ? (
+                    <Image source={{ uri: p.image_url }} style={s.reviewItemImg} resizeMode="contain" />
+                  ) : (
+                    <View style={[s.reviewItemImg, { alignItems: 'center', justifyContent: 'center' }]}>
+                      <Ionicons name="leaf-outline" size={20} color="rgba(46,125,50,0.2)" />
+                    </View>
+                  )}
                   <View style={{ flex: 1 }}>
                     <Text style={s.reviewItemName}>{p.name}</Text>
                     <Text style={s.reviewItemMeta}>{p.variety} · ×{qty}</Text>
