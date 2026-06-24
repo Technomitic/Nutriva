@@ -151,7 +151,7 @@ export default function HomeScreen() {
   }, [user?.id]);
 
   // Web header: default address — re-fetch every time screen gains focus
-  const [defaultAddr, setDefaultAddr] = useState<string | null>(null);
+  const [defaultAddr, setDefaultAddr] = useState<{ label: string; address: string } | null>(null);
   useFocusEffect(
     useCallback(() => {
       if (!isWeb) return;
@@ -160,7 +160,7 @@ export default function HomeScreen() {
         try {
           const addrs = JSON.parse(stored);
           const def = addrs.find((a: any) => a.isDefault) || addrs[0];
-          if (def) setDefaultAddr(def.address || def.label || null);
+          if (def) setDefaultAddr({ label: def.label || 'Delivery', address: def.address || '' });
           else setDefaultAddr(null);
         } catch { setDefaultAddr(null); }
       });
@@ -337,9 +337,14 @@ export default function HomeScreen() {
           {/* Address */}
           <Pressable style={[webStyles.addressBtn, { borderColor: d.border }]} onPress={() => router.push('/addresses' as any)}>
             <Ionicons name="location-outline" size={16} color={d.accent} />
-            <Text style={[webStyles.addressText, { color: d.text }]} numberOfLines={1}>
-              {defaultAddr || 'Add delivery address'}
-            </Text>
+            {defaultAddr ? (
+              <View style={webStyles.addressInfo}>
+                <Text style={[webStyles.addressLabel, { color: d.text }]}>{defaultAddr.label}</Text>
+                <Text style={[webStyles.addressText, { color: d.textMuted }]} numberOfLines={1}>{defaultAddr.address}</Text>
+              </View>
+            ) : (
+              <Text style={[webStyles.addressText, { color: d.textMuted }]}>Add delivery address</Text>
+            )}
             <Ionicons name="chevron-down" size={14} color={d.textMuted} />
           </Pressable>
 
@@ -1240,16 +1245,25 @@ const webStyles = StyleSheet.create({
   addressBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(46, 125, 50, 0.12)',
-    maxWidth: 240,
+    maxWidth: 260,
+  },
+  addressInfo: {
+    flex: 1,
+  },
+  addressLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1B3C12',
+    lineHeight: 16,
   },
   addressText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '500',
     color: '#2E4A26',
     flex: 1,
