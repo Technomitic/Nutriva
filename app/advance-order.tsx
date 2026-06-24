@@ -31,8 +31,6 @@ interface SavedAddress {
 }
 
 const { width: SW } = Dimensions.get('window');
-const CAL_PADDING = spacing.lg * 2 + spacing.lg * 2 + 2; // section padding + card padding + border
-const CELL = Math.floor((Math.min(SW, 430) - CAL_PADDING) / 7);
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -475,13 +473,14 @@ const s = StyleSheet.create({
     padding: spacing.lg, marginBottom: spacing.xl,
     borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.12)',
     shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 4,
+    maxWidth: 430, alignSelf: 'center' as const, width: '100%',
   },
   calHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg },
   calTitle: { fontSize: 18, fontWeight: '700', color: '#1B3C12' },
   calWeekdays: { flexDirection: 'row' },
-  calWeekday: { width: CELL, textAlign: 'center', fontSize: 11, fontWeight: '600', color: 'rgba(27, 60, 18, 0.5)', marginBottom: 8 },
+  calWeekday: { width: '14.28%' as any, textAlign: 'center', fontSize: 11, fontWeight: '600', color: 'rgba(27, 60, 18, 0.5)', marginBottom: 8 },
   calGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  calDay: { width: CELL, height: CELL, alignItems: 'center', justifyContent: 'center', borderRadius: CELL / 2 },
+  calDay: { width: '14.28%' as any, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 100 },
   calDayPast: { opacity: 0.3 },
   calDayToday: { borderWidth: 2, borderColor: 'rgba(46, 125, 50, 0.2)' },
   calDaySelected: { backgroundColor: '#2E7D32' },
