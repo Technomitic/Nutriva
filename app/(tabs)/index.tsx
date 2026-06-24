@@ -160,7 +160,7 @@ export default function HomeScreen() {
         try {
           const addrs = JSON.parse(stored);
           const def = addrs.find((a: any) => a.isDefault) || addrs[0];
-          if (def) setDefaultAddr(`${def.line1}${def.line2 ? ', ' + def.line2 : ''}, ${def.city}`);
+          if (def) setDefaultAddr(def.address || def.label || null);
           else setDefaultAddr(null);
         } catch { setDefaultAddr(null); }
       });
