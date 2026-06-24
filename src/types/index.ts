@@ -97,6 +97,7 @@ export interface Profile {
   total_orders: number;
   total_spent: number;
   push_token?: string;
+  avatar_url?: string;
   created_at: string;
 }
 

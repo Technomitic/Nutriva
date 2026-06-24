@@ -376,7 +376,11 @@ export default function HomeScreen() {
           {/* Auth */}
           {user ? (
             <Pressable style={[webStyles.profileBtn, { borderColor: d.border }]} onPress={() => router.push('/(tabs)/profile')}>
-              <Ionicons name="person" size={18} color="#FFFFFF" />
+              {user.avatar_url ? (
+                <Image source={{ uri: user.avatar_url }} style={webStyles.profileImg} />
+              ) : (
+                <Ionicons name="person" size={18} color="#FFFFFF" />
+              )}
             </Pressable>
           ) : (
             <Pressable style={webStyles.signInBtn} onPress={() => router.push('/(auth)/login')}>
@@ -1186,6 +1190,12 @@ const webStyles = StyleSheet.create({
     backgroundColor: '#2E7D32',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  profileImg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   signInBtn: {
     paddingVertical: 10,

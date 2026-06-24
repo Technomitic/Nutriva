@@ -38,8 +38,13 @@ function buildFallbackProfile(authUser: any): Profile {
   const email = authUser.email || '';
   const name =
     authUser.user_metadata?.name ||
+    authUser.user_metadata?.full_name ||
     email.split('@')[0] ||
     'User';
+  const avatar_url =
+    authUser.user_metadata?.avatar_url ||
+    authUser.user_metadata?.picture ||
+    undefined;
   return {
     id: authUser.id,
     name,
@@ -47,6 +52,7 @@ function buildFallbackProfile(authUser: any): Profile {
     role: 'user', // Never grant admin on client — DB trigger handles this
     phone: '',
     address: '',
+    avatar_url,
     total_orders: 0,
     total_spent: 0,
     created_at: authUser.created_at || new Date().toISOString(),
