@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography, glass } from '../../src/theme';
 import { products } from '../../src/data/products';
@@ -149,19 +150,22 @@ export default function HomeScreen() {
       .then(({ count }) => { if (count !== null) setNotifCount(count); });
   }, [user?.id]);
 
-  // Web header: default address
+  // Web header: default address — re-fetch every time screen gains focus
   const [defaultAddr, setDefaultAddr] = useState<string | null>(null);
-  useEffect(() => {
-    if (!isWeb) return;
-    AsyncStorage.getItem(ADDRESSES_KEY).then((stored) => {
-      if (!stored) return;
-      try {
-        const addrs = JSON.parse(stored);
-        const def = addrs.find((a: any) => a.isDefault) || addrs[0];
-        if (def) setDefaultAddr(`${def.line1}${def.line2 ? ', ' + def.line2 : ''}, ${def.city}`);
-      } catch {}
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (!isWeb) return;
+      AsyncStorage.getItem(ADDRESSES_KEY).then((stored) => {
+        if (!stored) { setDefaultAddr(null); return; }
+        try {
+          const addrs = JSON.parse(stored);
+          const def = addrs.find((a: any) => a.isDefault) || addrs[0];
+          if (def) setDefaultAddr(`${def.line1}${def.line2 ? ', ' + def.line2 : ''}, ${def.city}`);
+          else setDefaultAddr(null);
+        } catch { setDefaultAddr(null); }
+      });
+    }, [])
+  );
 
   const FILTER_TAGS = ['all', 'SEASONAL', 'IMPORTED', 'TROPICAL', 'PREMIUM', 'FARM FRESH'];
 
