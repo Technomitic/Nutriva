@@ -31,6 +31,8 @@ interface SavedAddress {
 }
 
 const { width: SW } = Dimensions.get('window');
+const CAL_PADDING = spacing.lg * 2 + spacing.lg * 2 + 2; // section padding + card padding + border
+const CELL = Math.floor((Math.min(SW, 430) - CAL_PADDING) / 7);
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
