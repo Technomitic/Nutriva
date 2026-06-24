@@ -533,33 +533,37 @@ export default function HomeScreen() {
                   </Pressable>
                 )}
               </View>
-              <View style={styles.freshnessTag}>
-                <Text style={styles.freshnessText}>{product.freshness}</Text>
-              </View>
-              {productRatings[product.id] && (
-                <View style={styles.cardRating}>
-                  <Ionicons name="star" size={11} color="#F9A825" />
-                  <Text style={[styles.cardRatingText, { color: d.text }]}>
-                    {productRatings[product.id].avg.toFixed(1)}
-                  </Text>
-                  <Text style={[styles.cardRatingCount, { color: d.textMuted }]}>({productRatings[product.id].count})</Text>
+              <View style={styles.cardBody}>
+                <View style={styles.freshnessTag}>
+                  <Text style={styles.freshnessText}>{product.freshness}</Text>
                 </View>
-              )}
-              <Text style={[styles.harvestName, { color: d.text }]}>{product.name}</Text>
-              <Text style={[styles.harvestOrigin, { color: d.textMuted }]}>
-                {product.origin.split('·')[1]?.trim() || product.origin}
-              </Text>
-              <View style={styles.harvestFooter}>
-                <Text style={[styles.harvestPrice, { color: d.accent }]}>₹{product.price}<Text style={[styles.harvestUnit, { color: d.textMuted }]}>{product.unit}</Text></Text>
-                <Pressable
-                  style={styles.addBtn}
-                  onPress={(e) => {
-                    e.stopPropagation?.();
-                    handleAddToCart(product);
-                  }}
-                >
-                  <Ionicons name="add" size={18} color={colors.onPrimary} />
-                </Pressable>
+                <View style={styles.cardRatingSlot}>
+                  {productRatings[product.id] && (
+                    <View style={styles.cardRating}>
+                      <Ionicons name="star" size={11} color="#F9A825" />
+                      <Text style={[styles.cardRatingText, { color: d.text }]}>
+                        {productRatings[product.id].avg.toFixed(1)}
+                      </Text>
+                      <Text style={[styles.cardRatingCount, { color: d.textMuted }]}>({productRatings[product.id].count})</Text>
+                    </View>
+                  )}
+                </View>
+                <Text numberOfLines={1} style={[styles.harvestName, { color: d.text }]}>{product.name}</Text>
+                <Text numberOfLines={1} style={[styles.harvestOrigin, { color: d.textMuted }]}>
+                  {product.origin.split('·')[1]?.trim() || product.origin}
+                </Text>
+                <View style={styles.harvestFooter}>
+                  <Text style={[styles.harvestPrice, { color: d.accent }]}>₹{product.price}<Text style={[styles.harvestUnit, { color: d.textMuted }]}>{product.unit}</Text></Text>
+                  <Pressable
+                    style={styles.addBtn}
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      handleAddToCart(product);
+                    }}
+                  >
+                    <Ionicons name="add" size={18} color={colors.onPrimary} />
+                  </Pressable>
+                </View>
               </View>
             </Pressable>
             </Animated.View>
@@ -854,6 +858,10 @@ const styles = StyleSheet.create({
     width: '85%',
     height: '85%',
   },
+  cardBody: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
   freshnessTag: {
     alignSelf: 'flex-start',
     backgroundColor: 'rgba(76, 175, 80, 0.15)',
@@ -867,9 +875,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: glass.accentBright,
   },
+  cardRatingSlot: {
+    height: 16,
+    marginBottom: 2,
+  },
   cardRating: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
-    marginBottom: 2,
   },
   cardRatingText: { fontSize: 11, fontWeight: '700', color: glass.textPrimary },
   cardRatingCount: { fontSize: 10, color: glass.textMuted },
