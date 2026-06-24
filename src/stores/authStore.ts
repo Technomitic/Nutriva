@@ -11,6 +11,11 @@ interface SignUpResult {
   needsConfirmation: boolean;
 }
 
+interface SignUpConsent {
+  acceptedTermsAt: string;
+  marketingOptIn: boolean;
+}
+
 // ── Helpers ──
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -53,7 +58,7 @@ interface AuthState {
   isAuthenticated: boolean;
 
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<SignUpResult>;
+  signUp: (email: string, password: string, name: string, consent?: SignUpConsent) => Promise<SignUpResult>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   loadSession: () => Promise<void>;
@@ -116,16 +121,22 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: profile, isAuthenticated: true });
   },
 
-  signUp: async (email: string, password: string, name: string) => {
+  signUp: async (email: string, password: string, name: string, consent?: SignUpConsent) => {
     if (!supabase) throw new Error('Supabase not configured');
 
-    // Pass name in metadata — the database trigger handle_new_user()
+    // Pass name + consent in metadata — the database trigger handle_new_user()
     // will create the profile automatically using this metadata
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { name },
+        data: {
+          name,
+          ...(consent && {
+            accepted_terms_at: consent.acceptedTermsAt,
+            marketing_opt_in: consent.marketingOptIn,
+          }),
+        },
       },
     });
     if (error) throw error;

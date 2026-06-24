@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, Pressable, ScrollView,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
-  Animated, Dimensions, Easing,
+  Animated, Dimensions, Easing, Linking,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -73,7 +73,11 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmationSent, setConfirmationSent] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const cardAnim = useCardEntrance();
+
+  const canSubmit = acceptedTerms && !loading;
   const phoneRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
@@ -101,7 +105,20 @@ export default function SignupScreen() {
   const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
   const strengthColors = ['', colors.error, '#f57c00', '#1a73e8', colors.secondary];
 
+  const openPolicy = (section: 'terms' | 'privacy') => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      // Open in same app — navigate to about with query param
+      router.push(`/about?section=${section}`);
+    } else {
+      router.push(`/about?section=${section}`);
+    }
+  };
+
   const handleSignup = async () => {
+    if (!acceptedTerms) {
+      setError('Please accept the Terms of Service to continue');
+      return;
+    }
     if (!name.trim() || !email.trim() || !password) {
       setError('Please fill in all fields');
       return;
@@ -117,7 +134,11 @@ export default function SignupScreen() {
     setLoading(true);
     setError('');
     try {
-      const result = await signUp(email.trim(), password, name.trim());
+      const consent = {
+        acceptedTermsAt: new Date().toISOString(),
+        marketingOptIn,
+      };
+      const result = await signUp(email.trim(), password, name.trim(), consent);
       // Save phone number to profile if we got a session
       if (!result.needsConfirmation && supabase) {
         const { data: sessionData } = await supabase.auth.getSession();
@@ -296,10 +317,62 @@ export default function SignupScreen() {
               </View>
             )}
 
+            {/* ── Legal Consent Section ── */}
+            <View style={styles.consentSection}>
+              {/* Mandatory: T&C + Privacy */}
+              <Pressable
+                style={styles.consentRow}
+                onPress={() => setAcceptedTerms(!acceptedTerms)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: acceptedTerms }}
+              >
+                <Ionicons
+                  name={acceptedTerms ? 'checkbox' : 'square-outline'}
+                  size={22}
+                  color={acceptedTerms ? '#A5D6A7' : 'rgba(255,255,255,0.35)'}
+                />
+                <Text style={styles.consentText}>
+                  I agree to the{' '}
+                  <Text style={styles.consentLink} onPress={() => openPolicy('terms')}>
+                    Terms of Service
+                  </Text>
+                  {' '}and acknowledge the{' '}
+                  <Text style={styles.consentLink} onPress={() => openPolicy('privacy')}>
+                    Privacy Policy
+                  </Text>
+                </Text>
+              </Pressable>
+
+              {/* Optional: Marketing Opt-In */}
+              <Pressable
+                style={styles.consentRow}
+                onPress={() => setMarketingOptIn(!marketingOptIn)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: marketingOptIn }}
+              >
+                <Ionicons
+                  name={marketingOptIn ? 'checkbox' : 'square-outline'}
+                  size={22}
+                  color={marketingOptIn ? '#A5D6A7' : 'rgba(255,255,255,0.25)'}
+                />
+                <Text style={styles.consentTextOptional}>
+                  Send me updates on seasonal offers & new arrivals
+                </Text>
+              </Pressable>
+
+              {/* Age Verification Statement */}
+              <View style={styles.ageNotice}>
+                <Ionicons name="shield-checkmark-outline" size={14} color="rgba(255,255,255,0.3)" />
+                <Text style={styles.ageNoticeText}>
+                  By creating an account, you confirm you are at least 18 years old
+                </Text>
+              </View>
+            </View>
+
             <Pressable
-              style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
+              style={[styles.submitBtn, !canSubmit && styles.submitBtnLocked]}
               onPress={handleSignup}
-              disabled={loading}
+              disabled={!canSubmit}
             >
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
@@ -311,9 +384,12 @@ export default function SignupScreen() {
               )}
             </Pressable>
 
-            <Text style={styles.terms}>
-              By signing up, you agree to our Terms and Privacy Policy
-            </Text>
+            {!acceptedTerms && (
+              <Text style={styles.consentHint}>
+                <Ionicons name="lock-closed-outline" size={11} color="rgba(255,255,255,0.3)" />
+                {'  '}Accept the Terms of Service to unlock sign up
+              </Text>
+            )}
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -395,11 +471,49 @@ const styles = StyleSheet.create({
     borderRadius: radius.full, marginTop: spacing.sm,
     borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  submitBtnDisabled: { opacity: 0.6 },
+  submitBtnLocked: { opacity: 0.35 },
   submitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
-  terms: {
-    fontSize: 12, color: 'rgba(255, 255, 255, 0.35)', textAlign: 'center',
-    marginTop: spacing.lg, lineHeight: 18,
+  // ── Legal Consent ──
+  consentSection: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
+    paddingTop: spacing.base,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  consentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingVertical: 8,
+  },
+  consentText: {
+    flex: 1, fontSize: 13, color: 'rgba(255, 255, 255, 0.65)',
+    lineHeight: 20,
+  },
+  consentLink: {
+    color: '#A5D6A7',
+    textDecorationLine: 'underline',
+    fontWeight: '600',
+  },
+  consentTextOptional: {
+    flex: 1, fontSize: 12.5, color: 'rgba(255, 255, 255, 0.4)',
+    lineHeight: 19,
+  },
+  ageNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+    paddingVertical: 4,
+  },
+  ageNoticeText: {
+    fontSize: 11, color: 'rgba(255, 255, 255, 0.3)',
+    lineHeight: 16,
+  },
+  consentHint: {
+    fontSize: 11.5, color: 'rgba(255, 255, 255, 0.3)', textAlign: 'center',
+    marginTop: spacing.base, lineHeight: 16,
   },
   // ── Confirmation Card ──
   confirmCard: {

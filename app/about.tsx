@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Animated } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
 import { supabase } from '../src/api/supabase';
@@ -96,7 +96,11 @@ export default function AboutScreen() {
   const d = useDynamic();
 
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<Section>('story');
+  const params = useLocalSearchParams<{ section?: string }>();
+  const initialSection = (['privacy', 'terms', 'refund', 'shipping'].includes(params.section || '')
+    ? params.section as Section
+    : 'story');
+  const [activeSection, setActiveSection] = useState<Section>(initialSection);
   const [configData, setConfigData] = useState<Record<string, string>>({});
 
   useEffect(() => {
