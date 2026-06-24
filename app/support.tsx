@@ -81,6 +81,7 @@ export default function SupportScreen() {
   const flatListRef = useRef<FlatList>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [ticketId, setTicketId] = useState<string | null>(null);
+  const [pendingTopic, setPendingTopic] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.id) fetchOrders(user.id);
@@ -201,66 +202,33 @@ export default function SupportScreen() {
       return;
     }
 
-    // For ticket-based topics: check for existing open ticket or create new
-    if (!supabase || !user) {
-      // No Supabase — fallback to local
-      setMessages([{
-        id: 'welcome', order_id: '', sender: 'system',
-        text: `You selected: ${topic.label}. How can we help you today?`,
-        type: 'text', created_at: new Date().toISOString(),
-      }]);
-      setScreen('chat');
-      return;
+    // Check for existing open ticket to resume
+    if (supabase && user) {
+      const { data: existing } = await supabase
+        .from('support_tickets')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('topic', topic.id)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        setTicketId(existing[0].id);
+        setPendingTopic(null);
+        setScreen('chat');
+        return;
+      }
     }
 
-    // Check for existing open ticket for this topic
-    const { data: existing } = await supabase
-      .from('support_tickets')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('topic', topic.id)
-      .eq('status', 'open')
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (existing && existing.length > 0) {
-      // Resume existing ticket
-      setTicketId(existing[0].id);
-      setScreen('chat');
-      return;
-    }
-
-    // Create new ticket
-    const { data: newTicket, error } = await supabase
-      .from('support_tickets')
-      .insert({
-        user_id: user.id,
-        user_name: user.name || user.email || 'User',
-        topic: topic.id,
-        status: 'open',
-      })
-      .select('id')
-      .single();
-
-    if (error || !newTicket) {
-      setMessages([{
-        id: 'error', order_id: '', sender: 'system',
-        text: 'Failed to create support ticket. Please try again.',
-        type: 'text', created_at: new Date().toISOString(),
-      }]);
-      setScreen('chat');
-      return;
-    }
-
-    setTicketId(newTicket.id);
-
-    // Insert welcome system message
-    await supabase.from('support_messages').insert({
-      ticket_id: newTicket.id,
-      sender: 'system',
+    // No existing ticket — show local welcome, defer ticket creation to first send
+    setPendingTopic(topic.id);
+    setTicketId(null);
+    setMessages([{
+      id: 'welcome', order_id: '', sender: 'system',
       text: `You selected: ${topic.label}. How can we help you today?`,
-    });
-
+      type: 'text', created_at: new Date().toISOString(),
+    }]);
     setScreen('chat');
   };
 
@@ -329,14 +297,36 @@ export default function SupportScreen() {
             type: 'text',
           });
         } else if (ticketId) {
-          // Ticket-based chat
+          // Existing ticket — just send message
           await supabase.from('support_messages').insert({
             ticket_id: ticketId,
             sender,
             text,
           });
-          // Update ticket timestamp
           await supabase.from('support_tickets').update({ updated_at: new Date().toISOString() }).eq('id', ticketId);
+        } else if (pendingTopic) {
+          // First message — create ticket now
+          const { data: newTicket, error } = await supabase
+            .from('support_tickets')
+            .insert({
+              user_id: user.id,
+              user_name: user.name || user.email || 'User',
+              topic: pendingTopic,
+              status: 'open',
+            })
+            .select('id')
+            .single();
+
+          if (!error && newTicket) {
+            setTicketId(newTicket.id);
+            setPendingTopic(null);
+            // Save the user's message
+            await supabase.from('support_messages').insert({
+              ticket_id: newTicket.id,
+              sender,
+              text,
+            });
+          }
         }
       } catch (err) {
         console.error('Support send error:', err);
@@ -353,6 +343,23 @@ export default function SupportScreen() {
   };
 
   // ── Header ──
+  const getHeaderIcon = (): { name: keyof typeof Ionicons.glyphMap; color: string } => {
+    if (screen === 'chat') {
+      if (selectedOrder) return { name: 'receipt', color: '#FFFFFF' };
+      if (selectedTopic) {
+        const topic = TOPICS.find((t) => t.id === selectedTopic.id);
+        const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
+          product: 'leaf', feedback: 'star', other: 'chatbubble-ellipses',
+          order: 'receipt', delivery: 'bicycle',
+        };
+        return { name: iconMap[selectedTopic.id] || 'headset', color: '#FFFFFF' };
+      }
+    }
+    return { name: 'headset', color: '#FFFFFF' };
+  };
+
+  const headerIcon = getHeaderIcon();
+
   const renderHeader = () => (
     <View style={styles.header}>
       <Pressable style={styles.backBtn} onPress={screen === 'topics' ? () => router.back() : handleBack}>
@@ -368,11 +375,14 @@ export default function SupportScreen() {
         <Text style={styles.headerStatus}>
           {screen === 'topics' ? 'We\'re here to help' :
            screen === 'pick-order' ? 'Choose the order you need help with' :
-           'Active'}
+           ticketId ? 'Active ticket' : pendingTopic ? 'New conversation' : 'Active'}
         </Text>
       </View>
-      <View style={styles.headerAvatar}>
-        <Ionicons name="headset" size={22} color="#FFFFFF" />
+      <View style={[
+        styles.headerAvatar,
+        screen === 'chat' && selectedTopic ? { backgroundColor: selectedTopic.color } : {},
+      ]}>
+        <Ionicons name={headerIcon.name} size={22} color={headerIcon.color} />
       </View>
     </View>
   );

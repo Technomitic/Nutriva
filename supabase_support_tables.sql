@@ -54,3 +54,14 @@ CREATE POLICY "Insert support messages" ON support_messages
 -- 3. Enable Realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE support_tickets;
 ALTER PUBLICATION supabase_realtime ADD TABLE support_messages;
+
+-- 4. Auto-delete resolved tickets after 48 hours
+-- Enable pg_cron extension (already enabled on most Supabase projects)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Schedule cleanup every hour
+SELECT cron.schedule(
+  'cleanup-resolved-support-tickets',
+  '0 * * * *',  -- every hour
+  $$DELETE FROM support_tickets WHERE status = 'resolved' AND updated_at < now() - interval '48 hours'$$
+);
