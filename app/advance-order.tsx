@@ -524,26 +524,26 @@ const s = StyleSheet.create({
 
   // Products
   prodSectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: spacing.lg, color: '#1B3C12' },
-  prodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  prodGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.base },
   prodCard: {
-    width: (Math.min(SW, 430) - spacing.lg * 2 - spacing.sm * 2) / 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', borderRadius: 14,
-    padding: spacing.sm, alignItems: 'center',
+    width: (Math.min(SW, 430) - spacing.lg * 2 - spacing.base) / 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', borderRadius: 16,
+    padding: spacing.base, alignItems: 'center',
     borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)',
   },
-  prodImgWrap: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
-  prodImg: { width: 48, height: 48 },
-  prodName: { fontSize: 11, fontWeight: '600', textAlign: 'center', marginBottom: 2, color: '#2E4A26' },
-  prodPrice: { fontSize: 12, fontWeight: '700', color: '#2E7D32', marginBottom: 6 },
+  prodImgWrap: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  prodImg: { width: 72, height: 72 },
+  prodName: { fontSize: 14, fontWeight: '600', textAlign: 'center', marginBottom: 4, color: '#2E4A26' },
+  prodPrice: { fontSize: 15, fontWeight: '700', color: '#2E7D32', marginBottom: 10 },
   prodAddBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: '#2E7D32', paddingVertical: 5, paddingHorizontal: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#2E7D32', paddingVertical: 8, paddingHorizontal: 18,
     borderRadius: radius.full, borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.18)',
   },
-  prodAddText: { color: '#FFFFFF', fontSize: 11, fontWeight: '600' },
-  prodQtyRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  prodQtyBtn: { width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(46, 125, 50, 0.06)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.10)' },
-  prodQtyText: { fontSize: 14, fontWeight: '700', minWidth: 14, textAlign: 'center', color: '#2E4A26' },
+  prodAddText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
+  prodQtyRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  prodQtyBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(46, 125, 50, 0.06)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.10)' },
+  prodQtyText: { fontSize: 16, fontWeight: '700', minWidth: 18, textAlign: 'center', color: '#2E4A26' },
 
   // Review
   reviewCard: {
