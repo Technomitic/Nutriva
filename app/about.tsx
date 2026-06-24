@@ -359,7 +359,7 @@ const s = StyleSheet.create({
   headerVersion: { fontSize: 12, color: 'rgba(27, 60, 18, 0.5)', backgroundColor: 'rgba(46, 125, 50, 0.05)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.06)' },
 
   // Tabs
-  tabBar: { borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.06)', paddingVertical: spacing.sm },
+  tabBar: { flexShrink: 0, borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.06)', paddingVertical: spacing.sm },
   tabBarContent: { paddingHorizontal: spacing.lg, gap: 8, alignItems: 'center' },
   tab: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
