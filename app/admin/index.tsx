@@ -2389,8 +2389,8 @@ export default function AdminScreen() {
                   {(['open', 'resolved', 'all'] as const).map((f) => (
                     <Pressable key={f} style={[s.filterChip, supportFilter === f && s.filterChipActive]} onPress={() => setSupportFilter(f)}>
                       <Text style={[s.filterChipText, supportFilter === f && s.filterChipTextActive]}>
-                        {f === 'open' ? `🟢 Open (${supportTickets.filter((t) => t.status === 'open').length})` :
-                         f === 'resolved' ? `✅ Resolved (${supportTickets.filter((t) => t.status === 'resolved').length})` :
+                        {f === 'open' ? `Open (${supportTickets.filter((t) => t.status === 'open').length})` :
+                         f === 'resolved' ? `Resolved (${supportTickets.filter((t) => t.status === 'resolved').length})` :
                          `All (${supportTickets.length})`}
                       </Text>
                     </Pressable>
@@ -2406,44 +2406,89 @@ export default function AdminScreen() {
                   filtered.map((ticket) => (
                     <View
                       key={ticket.id}
-                      style={[s.card, selectedSupportTicket?.id === ticket.id && { borderColor: colors.primary, borderWidth: 2 }]}
+                      style={{
+                        backgroundColor: colors.surfaceContainerLowest,
+                        borderRadius: 16,
+                        marginBottom: spacing.base,
+                        borderWidth: selectedSupportTicket?.id === ticket.id ? 2 : 1,
+                        borderColor: selectedSupportTicket?.id === ticket.id ? colors.primary : 'rgba(46,125,50,0.08)',
+                        overflow: 'hidden',
+                      }}
                     >
-                      <Pressable onPress={() => setSelectedSupportTicket(selectedSupportTicket?.id === ticket.id ? null : ticket)}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: `${supportTopicColor(ticket.topic)}15`, alignItems: 'center', justifyContent: 'center' }}>
+                      {/* Header — pressable to expand/collapse */}
+                      <Pressable
+                        onPress={() => setSelectedSupportTicket(selectedSupportTicket?.id === ticket.id ? null : ticket)}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: spacing.lg }}
+                      >
+                        {/* Topic icon */}
+                        <View style={{
+                          width: 44, height: 44, borderRadius: 22,
+                          backgroundColor: `${supportTopicColor(ticket.topic)}12`,
+                          alignItems: 'center', justifyContent: 'center',
+                          borderWidth: 1, borderColor: `${supportTopicColor(ticket.topic)}20`,
+                        }}>
                           <Ionicons
-                            name={ticket.topic === 'product' ? 'leaf-outline' : ticket.topic === 'feedback' ? 'star-outline' : 'chatbubble-ellipses-outline'}
+                            name={ticket.topic === 'product' ? 'leaf' : ticket.topic === 'feedback' ? 'star' : 'chatbubble-ellipses'}
                             size={20} color={supportTopicColor(ticket.topic)}
                           />
                         </View>
+
+                        {/* Info */}
                         <View style={{ flex: 1 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            <Text style={[s.cardTitle, d.s.text]}>{ticket.user_name || 'User'}</Text>
-                            <View style={{ backgroundColor: `${supportTopicColor(ticket.topic)}18`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 }}>
-                              <Text style={{ fontSize: 10, fontWeight: '600', color: supportTopicColor(ticket.topic) }}>{supportTopicLabel(ticket.topic)}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                            <Text style={{ fontSize: 15, fontWeight: '700', color: d.text }}>{ticket.user_name || 'User'}</Text>
+                            <View style={{
+                              backgroundColor: `${supportTopicColor(ticket.topic)}14`,
+                              paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10,
+                            }}>
+                              <Text style={{ fontSize: 10, fontWeight: '700', color: supportTopicColor(ticket.topic), letterSpacing: 0.3 }}>
+                                {supportTopicLabel(ticket.topic)}
+                              </Text>
                             </View>
                           </View>
-                          <Text style={[s.cardSub, { marginTop: 2 }]}>{supportFormatDate(ticket.updated_at || ticket.created_at)}</Text>
-                        </View>
-                        <View style={{ backgroundColor: ticket.status === 'open' ? 'rgba(46,125,50,0.1)' : 'rgba(0,0,0,0.06)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
-                          <Text style={{ fontSize: 11, fontWeight: '600', color: ticket.status === 'open' ? '#2E7D32' : '#888' }}>
-                            {ticket.status === 'open' ? 'Open' : 'Resolved'}
+                          <Text style={{ fontSize: 12, color: colors.outline }}>
+                            {supportFormatDate(ticket.updated_at || ticket.created_at)}
                           </Text>
                         </View>
-                      </View>
+
+                        {/* Status badge + chevron */}
+                        <View style={{
+                          backgroundColor: ticket.status === 'open' ? 'rgba(46,125,50,0.1)' : 'rgba(0,0,0,0.05)',
+                          paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12,
+                        }}>
+                          <Text style={{
+                            fontSize: 11, fontWeight: '700',
+                            color: ticket.status === 'open' ? '#2E7D32' : '#888',
+                          }}>
+                            {ticket.status === 'open' ? '● Open' : '✓ Resolved'}
+                          </Text>
+                        </View>
+                        <Ionicons
+                          name={selectedSupportTicket?.id === ticket.id ? 'chevron-up' : 'chevron-down'}
+                          size={18} color={colors.outline}
+                        />
                       </Pressable>
 
-                      {/* Expanded: show messages + reply */}
+                      {/* Expanded: messages + reply */}
                       {selectedSupportTicket?.id === ticket.id && (
-                        <View style={{ marginTop: spacing.lg, borderTopWidth: 1, borderTopColor: 'rgba(46,125,50,0.08)', paddingTop: spacing.lg }}>
-                          {/* Messages */}
-                          <View style={{ maxHeight: 300 }}>
+                        <View style={{
+                          borderTopWidth: 1, borderTopColor: 'rgba(46,125,50,0.08)',
+                          backgroundColor: 'rgba(46,125,50,0.02)',
+                        }}>
+                          {/* Messages area */}
+                          <View style={{ maxHeight: 320, paddingHorizontal: spacing.lg, paddingTop: spacing.base }}>
                             <ScrollView showsVerticalScrollIndicator={false}>
                               {supportMessages.map((msg) => {
                                 if (msg.sender === 'system') {
                                   return (
-                                    <View key={msg.id} style={{ alignItems: 'center', marginVertical: 6 }}>
-                                      <Text style={{ fontSize: 11, color: 'rgba(27,60,18,0.4)', fontStyle: 'italic' }}>{msg.text}</Text>
+                                    <View key={msg.id} style={{
+                                      alignSelf: 'center', marginVertical: 8,
+                                      backgroundColor: 'rgba(46,125,50,0.06)',
+                                      paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12,
+                                    }}>
+                                      <Text style={{ fontSize: 11, color: 'rgba(27,60,18,0.5)', fontStyle: 'italic', textAlign: 'center' }}>
+                                        {msg.text}
+                                      </Text>
                                     </View>
                                   );
                                 }
@@ -2451,47 +2496,102 @@ export default function AdminScreen() {
                                 return (
                                   <View key={msg.id} style={{
                                     alignSelf: isAdmin ? 'flex-end' : 'flex-start',
-                                    maxWidth: '75%',
-                                    backgroundColor: isAdmin ? '#2E7D32' : 'rgba(255,255,255,0.7)',
-                                    borderRadius: 14, padding: 10, marginBottom: 8,
-                                    borderWidth: isAdmin ? 0 : 1, borderColor: 'rgba(46,125,50,0.1)',
+                                    maxWidth: '78%',
+                                    backgroundColor: isAdmin ? '#2E7D32' : '#FFFFFF',
+                                    borderRadius: 16,
+                                    borderBottomRightRadius: isAdmin ? 4 : 16,
+                                    borderBottomLeftRadius: isAdmin ? 16 : 4,
+                                    padding: 12, marginBottom: 8,
+                                    borderWidth: isAdmin ? 0 : 1,
+                                    borderColor: 'rgba(46,125,50,0.1)',
+                                    ...(isAdmin ? {} : {
+                                      shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+                                      shadowOpacity: 0.04, shadowRadius: 3, elevation: 1,
+                                    }),
                                   }}>
-                                    <Text style={{ fontSize: 13, color: isAdmin ? '#fff' : '#2E4A26', lineHeight: 18 }}>{msg.text}</Text>
-                                    <Text style={{ fontSize: 9, color: isAdmin ? 'rgba(255,255,255,0.6)' : 'rgba(27,60,18,0.35)', marginTop: 4, alignSelf: 'flex-end' }}>
+                                    {!isAdmin && (
+                                      <Text style={{ fontSize: 10, fontWeight: '700', color: supportTopicColor(ticket.topic), marginBottom: 3 }}>
+                                        {ticket.user_name || 'User'}
+                                      </Text>
+                                    )}
+                                    <Text style={{ fontSize: 14, color: isAdmin ? '#fff' : '#2E4A26', lineHeight: 20 }}>
+                                      {msg.text}
+                                    </Text>
+                                    <Text style={{
+                                      fontSize: 10, marginTop: 4, alignSelf: 'flex-end',
+                                      color: isAdmin ? 'rgba(255,255,255,0.6)' : 'rgba(27,60,18,0.35)',
+                                    }}>
                                       {supportFormatDate(msg.created_at)}
                                     </Text>
                                   </View>
                                 );
                               })}
                               {supportMessages.length === 0 && (
-                                <Text style={{ fontSize: 12, color: 'rgba(27,60,18,0.4)', textAlign: 'center', paddingVertical: 20 }}>No messages yet</Text>
+                                <View style={{ alignItems: 'center', paddingVertical: 30 }}>
+                                  <Ionicons name="chatbubble-outline" size={32} color="rgba(27,60,18,0.12)" />
+                                  <Text style={{ fontSize: 13, color: 'rgba(27,60,18,0.35)', marginTop: 8 }}>No messages yet</Text>
+                                </View>
                               )}
                             </ScrollView>
                           </View>
 
                           {/* Reply input */}
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.base }}>
+                          <View style={{
+                            flexDirection: 'row', alignItems: 'center', gap: 8,
+                            paddingHorizontal: spacing.lg, paddingVertical: spacing.base,
+                            borderTopWidth: 1, borderTopColor: 'rgba(46,125,50,0.06)',
+                          }}>
                             <TextInput
-                              style={[s.input, { flex: 1 }]}
+                              style={{
+                                flex: 1, backgroundColor: '#FFFFFF',
+                                borderRadius: 24, paddingHorizontal: 16, paddingVertical: 10,
+                                fontSize: 14, color: '#2E4A26',
+                                borderWidth: 1, borderColor: 'rgba(46,125,50,0.12)',
+                              }}
                               placeholder="Type admin reply..."
                               placeholderTextColor="rgba(27,60,18,0.3)"
                               value={supportReply}
                               onChangeText={setSupportReply}
                               onSubmitEditing={sendSupportReply}
+                              returnKeyType="send"
                             />
-                            <Pressable style={[s.primaryBtn, { paddingHorizontal: 16, paddingVertical: 10 }]} onPress={sendSupportReply}>
+                            <Pressable
+                              onPress={sendSupportReply}
+                              style={{
+                                width: 42, height: 42, borderRadius: 21,
+                                backgroundColor: '#2E7D32',
+                                alignItems: 'center', justifyContent: 'center',
+                              }}
+                            >
                               <Ionicons name="send" size={18} color="#fff" />
                             </Pressable>
                           </View>
 
-                          {/* Resolve / Reopen */}
-                          <Pressable
-                            style={[s.primaryBtn, { marginTop: spacing.base, backgroundColor: ticket.status === 'open' ? '#43A047' : '#FF9800' }]}
-                            onPress={() => ticket.status === 'open' ? resolveSupportTicket(ticket.id) : reopenSupportTicket(ticket.id)}
-                          >
-                            <Ionicons name={ticket.status === 'open' ? 'checkmark-circle' : 'refresh'} size={18} color="#fff" />
-                            <Text style={s.primaryBtnText}>{ticket.status === 'open' ? 'Mark as Resolved' : 'Reopen Ticket'}</Text>
-                          </Pressable>
+                          {/* Resolve / Reopen button */}
+                          <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.lg }}>
+                            <Pressable
+                              onPress={() => ticket.status === 'open' ? resolveSupportTicket(ticket.id) : reopenSupportTicket(ticket.id)}
+                              style={{
+                                flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                paddingVertical: 12, borderRadius: 14,
+                                backgroundColor: ticket.status === 'open' ? 'rgba(67,160,71,0.1)' : 'rgba(255,152,0,0.1)',
+                                borderWidth: 1,
+                                borderColor: ticket.status === 'open' ? 'rgba(67,160,71,0.2)' : 'rgba(255,152,0,0.2)',
+                              }}
+                            >
+                              <Ionicons
+                                name={ticket.status === 'open' ? 'checkmark-circle' : 'refresh'}
+                                size={18}
+                                color={ticket.status === 'open' ? '#43A047' : '#FF9800'}
+                              />
+                              <Text style={{
+                                fontSize: 13, fontWeight: '700',
+                                color: ticket.status === 'open' ? '#43A047' : '#FF9800',
+                              }}>
+                                {ticket.status === 'open' ? 'Mark as Resolved' : 'Reopen Ticket'}
+                              </Text>
+                            </Pressable>
+                          </View>
                         </View>
                       )}
                     </View>
