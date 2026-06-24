@@ -403,8 +403,10 @@ export default function HomeScreen() {
             style={styles.heroCta}
             onPress={(e) => { e.stopPropagation?.(); handleAddToCart(heroProduct); }}
           >
-            <Ionicons name="add" size={18} color={colors.primary} />
-            <Text style={styles.heroCtaText}>{t('home.add_to_cart')} — ₹{heroProduct.price}{heroProduct.unit}</Text>
+            <View style={styles.heroCtaCircle}>
+              <Ionicons name="add" size={16} color="#FFFFFF" />
+            </View>
+            <Text style={styles.heroCtaText}>₹{heroProduct.price}{heroProduct.unit}</Text>
           </Pressable>
         </View>
         {heroProduct.image ? (
@@ -708,17 +710,26 @@ const styles = StyleSheet.create({
   heroCta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: 'rgba(255,255,255,0.95)',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingLeft: 8,
+    paddingRight: 18,
     borderRadius: radius.full,
     alignSelf: 'flex-start',
+  },
+  heroCtaCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#2E7D32',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   heroCtaText: {
     color: colors.primary,
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 15,
   },
   heroImage: {
     position: 'absolute',
