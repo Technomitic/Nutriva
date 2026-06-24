@@ -6,8 +6,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, ScrollView, Pressable, Image, FlatList,
-  TextInput, StyleSheet, RefreshControl, Dimensions, Animated,
+  TextInput, StyleSheet, RefreshControl, Dimensions, Animated, Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography, glass } from '../../src/theme';
@@ -27,6 +28,8 @@ import {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (Math.min(SCREEN_WIDTH, 430) - spacing.lg * 2 - spacing.base) / 2;
+const isWeb = Platform.OS === 'web';
+const ADDRESSES_KEY = 'fresh-addresses';
 
 /* ── Mini Image Slider for Product Cards ── */
 function CardImageSlider({ product }: { product: Product }) {
@@ -133,6 +136,32 @@ export default function HomeScreen() {
   const [showSort, setShowSort] = useState(false);
   const d = useDynamic();
   const t = useT();
+
+  // Web header: notification count
+  const [notifCount, setNotifCount] = useState(0);
+  useEffect(() => {
+    if (!isWeb || !supabase || !user?.id) return;
+    supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .or(`user_id.eq.${user.id},user_id.is.null`)
+      .eq('read', false)
+      .then(({ count }) => { if (count !== null) setNotifCount(count); });
+  }, [user?.id]);
+
+  // Web header: default address
+  const [defaultAddr, setDefaultAddr] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isWeb) return;
+    AsyncStorage.getItem(ADDRESSES_KEY).then((stored) => {
+      if (!stored) return;
+      try {
+        const addrs = JSON.parse(stored);
+        const def = addrs.find((a: any) => a.isDefault) || addrs[0];
+        if (def) setDefaultAddr(`${def.line1}${def.line2 ? ', ' + def.line2 : ''}, ${def.city}`);
+      } catch {}
+    });
+  }, []);
 
   const FILTER_TAGS = ['all', 'SEASONAL', 'IMPORTED', 'TROPICAL', 'PREMIUM', 'FARM FRESH'];
 
@@ -290,6 +319,70 @@ export default function HomeScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
       }
     >
+      {/* ===== WEB HEADER ===== */}
+      {isWeb && (
+        <View style={[webStyles.header, { backgroundColor: d.cardBg, borderBottomColor: d.border }]}>
+          {/* Logo */}
+          <Pressable style={webStyles.logoWrap} onPress={() => router.replace('/(tabs)')}>
+            <View style={webStyles.logoIcon}>
+              <Ionicons name="leaf" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={webStyles.logoText}>Nutriva</Text>
+          </Pressable>
+
+          {/* Address */}
+          <Pressable style={[webStyles.addressBtn, { borderColor: d.border }]} onPress={() => router.push('/addresses' as any)}>
+            <Ionicons name="location-outline" size={16} color={d.accent} />
+            <Text style={[webStyles.addressText, { color: d.text }]} numberOfLines={1}>
+              {defaultAddr || 'Add delivery address'}
+            </Text>
+            <Ionicons name="chevron-down" size={14} color={d.textMuted} />
+          </Pressable>
+
+          {/* Search */}
+          <View style={[webStyles.searchBar, { backgroundColor: d.inputBg, borderColor: d.inputBorder }]}>
+            <Ionicons name="search" size={18} color={d.textDim} />
+            <TextInput
+              style={[webStyles.searchInput, { color: d.text }]}
+              placeholder={t('home.search_placeholder')}
+              placeholderTextColor={d.textDim}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            <Pressable
+              style={webStyles.sortBtn}
+              onPress={() => {
+                const next = sortBy === 'default' ? 'price-low' : sortBy === 'price-low' ? 'price-high' : 'default';
+                setSortBy(next);
+              }}
+            >
+              <Ionicons name="swap-vertical" size={16} color={sortBy !== 'default' ? '#2E7D32' : d.textDim} />
+            </Pressable>
+          </View>
+
+          {/* Notification */}
+          <Pressable style={[webStyles.iconBtn, { borderColor: d.border }]} onPress={() => router.push('/notifications')}>
+            <Ionicons name="notifications-outline" size={20} color={d.text} />
+            {notifCount > 0 && (
+              <View style={webStyles.badge}>
+                <Text style={webStyles.badgeText}>{notifCount > 99 ? '99+' : notifCount}</Text>
+              </View>
+            )}
+          </Pressable>
+
+          {/* Auth */}
+          {user ? (
+            <Pressable style={[webStyles.profileBtn, { borderColor: d.border }]} onPress={() => router.push('/(tabs)/profile')}>
+              <Ionicons name="person" size={18} color="#FFFFFF" />
+            </Pressable>
+          ) : (
+            <Pressable style={webStyles.signInBtn} onPress={() => router.push('/(auth)/login')}>
+              <Text style={webStyles.signInText}>Sign In</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
       {/* ===== HERO ===== */}
       <Pressable onPress={() => router.push(`/product/${heroProduct.id}`)}>
       <Animated.View style={[styles.hero, heroAnim]}>
@@ -327,26 +420,28 @@ export default function HomeScreen() {
       </Animated.View>
       </Pressable>
 
-      {/* ===== SEARCH ===== */}
-      <View style={[styles.searchBar, { backgroundColor: d.inputBg, borderColor: d.inputBorder }]}>
-        <Ionicons name="search" size={20} color={d.textDim} />
-        <TextInput
-          style={[styles.searchInput, { color: d.text }]}
-          placeholder={t('home.search_placeholder')}
-          placeholderTextColor={d.textDim}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        <Pressable
-          style={styles.sortBtn}
-          onPress={() => {
-            const next = sortBy === 'default' ? 'price-low' : sortBy === 'price-low' ? 'price-high' : 'default';
-            setSortBy(next);
-          }}
-        >
-          <Ionicons name="swap-vertical" size={18} color={sortBy !== 'default' ? '#2E7D32' : 'rgba(165,214,167,0.4)'} />
-        </Pressable>
-      </View>
+      {/* ===== SEARCH (mobile only — web search is in the header) ===== */}
+      {!isWeb && (
+        <View style={[styles.searchBar, { backgroundColor: d.inputBg, borderColor: d.inputBorder }]}>
+          <Ionicons name="search" size={20} color={d.textDim} />
+          <TextInput
+            style={[styles.searchInput, { color: d.text }]}
+            placeholder={t('home.search_placeholder')}
+            placeholderTextColor={d.textDim}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          <Pressable
+            style={styles.sortBtn}
+            onPress={() => {
+              const next = sortBy === 'default' ? 'price-low' : sortBy === 'price-low' ? 'price-high' : 'default';
+              setSortBy(next);
+            }}
+          >
+            <Ionicons name="swap-vertical" size={18} color={sortBy !== 'default' ? '#2E7D32' : 'rgba(165,214,167,0.4)'} />
+          </Pressable>
+        </View>
+      )}
 
       {/* ===== FILTER CHIPS ===== */}
       <ScrollView
@@ -921,5 +1016,129 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'rgba(21, 101, 192, 0.6)',
     lineHeight: 16,
+  },
+});
+
+/* ── Web-only Header Styles ── */
+const webStyles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(46, 125, 50, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  logoWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginRight: 8,
+  },
+  logoIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#2E7D32',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1B3C12',
+    letterSpacing: -0.5,
+  },
+  addressBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(46, 125, 50, 0.12)',
+    maxWidth: 240,
+  },
+  addressText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#2E4A26',
+    flex: 1,
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(46, 125, 50, 0.08)',
+    maxWidth: 420,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    outlineStyle: 'none',
+  } as any,
+  sortBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(46, 125, 50, 0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(46, 125, 50, 0.10)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#EF5350',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  badgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  profileBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#2E7D32',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  signInBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: '#2E7D32',
+  },
+  signInText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
