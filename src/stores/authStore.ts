@@ -32,6 +32,29 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   return data as Profile;
 }
 
+/** Fetch the avatar signed URL from Supabase Storage (avatars bucket) */
+async function fetchAvatarUrl(userId: string): Promise<string | undefined> {
+  if (!supabase) return undefined;
+  try {
+    const { data, error } = await supabase.storage
+      .from('avatars')
+      .createSignedUrl(`${userId}/avatar.jpg`, 3600);
+    if (!error && data?.signedUrl) return data.signedUrl;
+  } catch {
+    // No avatar uploaded yet
+  }
+  return undefined;
+}
+
+/** Merge the storage avatar URL into a profile if it doesn't already have one */
+async function enrichProfileWithAvatar(profile: Profile): Promise<Profile> {
+  if (!profile.avatar_url) {
+    const url = await fetchAvatarUrl(profile.id);
+    if (url) profile.avatar_url = url;
+  }
+  return profile;
+}
+
 /** Build a fallback Profile from Supabase auth.user when the DB trigger
  *  hasn't completed yet — ensures the user can use the app immediately */
 function buildFallbackProfile(authUser: any): Profile {
@@ -93,6 +116,9 @@ export const useAuthStore = create<AuthState>((set) => ({
           profile = buildFallbackProfile(session.user);
         }
 
+        // Fetch avatar from storage so the header can show it
+        profile = await enrichProfileWithAvatar(profile);
+
         set({ user: profile, isAuthenticated: true, isLoading: false });
         return;
       }
@@ -123,6 +149,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (!profile) {
       profile = buildFallbackProfile(data.user);
     }
+
+    // Fetch avatar from storage so the header can show it
+    profile = await enrichProfileWithAvatar(profile);
 
     set({ user: profile, isAuthenticated: true });
   },
@@ -163,6 +192,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (!profile) {
         profile = buildFallbackProfile(data.user);
       }
+
+      // Fetch avatar from storage so the header can show it
+      profile = await enrichProfileWithAvatar(profile);
 
       set({ user: profile, isAuthenticated: true });
       return { needsConfirmation: false };
