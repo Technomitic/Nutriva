@@ -641,10 +641,13 @@ export default function HomeScreen() {
                 <Text style={[styles.featuredUnit, { color: d.textMuted }]}> {featuredProduct.unit}</Text>
               </Text>
               <Pressable
-                style={[styles.addBtnSmall, { backgroundColor: d.isDark ? '#2E7D32' : d.accentLight, borderColor: d.isDark ? '#43A047' : d.border }]}
+                style={styles.addBtnSmall}
                 onPress={() => handleAddToCart(featuredProduct)}
               >
-                <Ionicons name="cart-outline" size={20} color={d.isDark ? '#FFFFFF' : colors.primary} />
+                <View style={styles.addBtnSmallCircle}>
+                  <Ionicons name="add" size={16} color="#FFFFFF" />
+                </View>
+                <Text style={styles.addBtnSmallText}>Add</Text>
               </Pressable>
             </View>
           </View>
@@ -1048,14 +1051,27 @@ const styles = StyleSheet.create({
     color: glass.textMuted,
   },
   addBtnSmall: {
-    width: 44,
-    height: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#2E7D32',
+    paddingVertical: 10,
+    paddingLeft: 10,
+    paddingRight: 18,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(46, 125, 50, 0.06)',
+  },
+  addBtnSmallCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: glass.cardBorder,
+  },
+  addBtnSmallText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
   // Advance Order Banner
   advanceBanner: {
