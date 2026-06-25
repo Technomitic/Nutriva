@@ -3,9 +3,9 @@
  * Shows user's saved favorite products with add-to-cart and remove actions
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, Pressable, Image, StyleSheet,
+  View, Text, ScrollView, Pressable, Image, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,9 @@ import { useWishlistStore } from '../src/stores/wishlistStore';
 import { useCartStore } from '../src/stores/cartStore';
 import { useUIStore } from '../src/stores/uiStore';
 import { products as localProducts } from '../src/data/products';
+import { supabase } from '../src/api/supabase';
 import { useDynamic } from '../src/hooks/useDynamic';
+import { Product } from '../src/types';
 
 export default function WishlistScreen() {
   const d = useDynamic();
@@ -26,11 +28,54 @@ export default function WishlistScreen() {
   const addItem = useCartStore((s) => s.addItem);
   const showToast = useUIStore((s) => s.showToast);
 
+  const [wishlistProducts, setWishlistProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (user?.id) loadWishlist(user.id);
   }, [user?.id]);
 
-  const wishlistProducts = localProducts.filter((p) => wishlistIds.includes(p.id));
+  // Fetch wishlisted products from Supabase, merging with local images
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      if (!supabase || wishlistIds.length === 0) {
+        // Fallback to local products if no Supabase
+        const local = localProducts.filter((p) => wishlistIds.includes(p.id));
+        setWishlistProducts(local);
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data } = await supabase
+          .from('products')
+          .select('*')
+          .in('id', wishlistIds);
+        if (data && data.length > 0) {
+          const merged = data.map((dbProd: any) => {
+            const local = localProducts.find((p) => p.id === dbProd.id);
+            return {
+              ...dbProd,
+              image: local?.image || null,
+              freshness: dbProd.freshness || local?.freshness || 'Fresh',
+            } as Product;
+          });
+          setWishlistProducts(merged);
+        } else {
+          // Fallback: try local products
+          const local = localProducts.filter((p) => wishlistIds.includes(p.id));
+          setWishlistProducts(local);
+        }
+      } catch {
+        // Fallback to local
+        const local = localProducts.filter((p) => wishlistIds.includes(p.id));
+        setWishlistProducts(local);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [wishlistIds]);
 
   const handleAddToCart = (product: any) => {
     addItem({
@@ -58,7 +103,11 @@ export default function WishlistScreen() {
         </Text>
       </View>
 
-      {wishlistProducts.length === 0 ? (
+      {loading ? (
+        <View style={st.empty}>
+          <ActivityIndicator size="large" color="#2E7D32" />
+        </View>
+      ) : wishlistProducts.length === 0 ? (
         <View style={st.empty}>
           <Ionicons name="heart-outline" size={64} color="rgba(27,60,18,0.2)" />
           <Text style={st.emptyTitle}>No favorites yet</Text>
@@ -74,7 +123,11 @@ export default function WishlistScreen() {
           {wishlistProducts.map((product) => (
             <View key={product.id} style={st.card}>
               <View style={st.cardImage}>
-                <Image source={product.image} style={st.img} resizeMode="contain" />
+                <Image
+                  source={product.image || (product.image_url ? { uri: product.image_url } : require('../assets/images/mango.png'))}
+                  style={st.img}
+                  resizeMode="contain"
+                />
               </View>
               <View style={st.cardInfo}>
                 <Text style={st.cardName}>{product.name}</Text>
