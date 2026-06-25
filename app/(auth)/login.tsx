@@ -341,9 +341,8 @@ const styles = StyleSheet.create({
   brand: { alignItems: 'center', marginBottom: spacing['2xl'] },
   logoCircle: {
     width: 72, height: 72, borderRadius: 36,
-    backgroundColor: 'rgba(165, 214, 167, 0.12)', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center',
     marginBottom: spacing.base,
-    borderWidth: 1.5, borderColor: 'rgba(165, 214, 167, 0.2)',
   },
   brandTitle: { fontSize: 40, fontWeight: '800', color: '#FFFFFF', letterSpacing: -1.5 },
   brandTagline: { fontSize: 11, color: 'rgba(165, 214, 167, 0.6)', marginTop: 4, letterSpacing: 3, textTransform: 'uppercase' },

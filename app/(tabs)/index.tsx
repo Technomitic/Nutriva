@@ -1232,7 +1232,7 @@ const webStyles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: '#2E7D32',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },

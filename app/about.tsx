@@ -376,12 +376,10 @@ const s = StyleSheet.create({
   // Brand Hero
   brandHero: { alignItems: 'center', marginBottom: spacing['2xl'] },
   logoWrap: { position: 'relative', marginBottom: spacing.lg },
-  logoPulse: { position: 'absolute', width: 88, height: 88, borderRadius: 44, backgroundColor: 'rgba(46,125,50,0.15)', top: -4, left: -4 },
+  logoPulse: { position: 'absolute', width: 88, height: 88, borderRadius: 44, backgroundColor: 'transparent', top: -4, left: -4 },
   logo: {
     width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#2E7D32', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: 'rgba(46, 125, 50, 0.18)',
-    shadowColor: '#1B5E20', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 10,
+    backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center',
   },
   brandName: { fontSize: 36, fontWeight: '800', letterSpacing: -1.5, color: '#2E7D32' },
   brandTagline: { fontSize: 14, color: 'rgba(27, 60, 18, 0.6)', marginTop: 2, fontStyle: 'italic', letterSpacing: 1 },
