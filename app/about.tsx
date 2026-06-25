@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Animated } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Animated, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
@@ -233,7 +233,7 @@ export default function AboutScreen() {
               <View style={s.logoWrap}>
                 <View style={s.logoPulse} />
                 <View style={s.logo}>
-                  <Ionicons name="leaf" size={36} color="#fff" />
+                  <Image source={require('../assets/images/nutriva-02.png')} style={{ width: 52, height: 52 }} resizeMode="contain" />
                 </View>
               </View>
               <Text style={[s.brandName, { color: d.accent }]}>Nutriva</Text>

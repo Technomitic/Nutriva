@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, Pressable, ScrollView,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
-  Animated, Dimensions, Easing,
+  Animated, Dimensions, Easing, Image,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -179,7 +179,7 @@ export default function LoginScreen() {
           {/* Brand */}
           <View style={styles.brand}>
             <View style={styles.logoCircle}>
-              <Ionicons name="leaf" size={32} color="#A5D6A7" />
+              <Image source={require('../../assets/images/nutriva-02.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />
             </View>
             <Text style={styles.brandTitle}>Nutriva</Text>
             <Text style={styles.brandTagline}>The Editorial Orchard</Text>

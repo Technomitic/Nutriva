@@ -329,7 +329,7 @@ export default function HomeScreen() {
           {/* Logo */}
           <Pressable style={webStyles.logoWrap} onPress={() => router.replace('/(tabs)')}>
             <View style={webStyles.logoIcon}>
-              <Ionicons name="leaf" size={20} color="#FFFFFF" />
+              <Image source={require('../../assets/images/nutriva-02.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
             </View>
             <Text style={webStyles.logoText}>Nutriva</Text>
           </Pressable>
