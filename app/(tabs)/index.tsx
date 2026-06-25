@@ -329,7 +329,7 @@ export default function HomeScreen() {
           {/* Logo */}
           <Pressable style={webStyles.logoWrap} onPress={() => router.replace('/(tabs)')}>
             <View style={webStyles.logoIcon}>
-              <Image source={require('../../assets/images/nutriva-02.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
+              <Image source={require('../../assets/images/nutriva-02.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />
             </View>
             <Text style={webStyles.logoText}>Nutriva</Text>
           </Pressable>
@@ -1229,8 +1229,8 @@ const webStyles = StyleSheet.create({
     marginRight: 8,
   },
   logoIcon: {
-    width: 34,
-    height: 34,
+    width: 42,
+    height: 42,
     borderRadius: 10,
     backgroundColor: 'transparent',
     alignItems: 'center',

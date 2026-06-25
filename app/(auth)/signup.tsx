@@ -209,7 +209,7 @@ export default function SignupScreen() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.brand}>
             <View style={styles.logoCircle}>
-              <Image source={require('../../assets/images/nutriva-02.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />
+              <Image source={require('../../assets/images/nutriva-02.png')} style={{ width: 72, height: 72 }} resizeMode="contain" />
             </View>
             <Text style={styles.brandTitle}>Nutriva</Text>
             <Text style={styles.brandTagline}>The Editorial Orchard</Text>

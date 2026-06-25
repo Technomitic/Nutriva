@@ -233,7 +233,7 @@ export default function AboutScreen() {
               <View style={s.logoWrap}>
                 <View style={s.logoPulse} />
                 <View style={s.logo}>
-                  <Image source={require('../assets/images/nutriva-02.png')} style={{ width: 52, height: 52 }} resizeMode="contain" />
+                  <Image source={require('../assets/images/nutriva-02.png')} style={{ width: 80, height: 80 }} resizeMode="contain" />
                 </View>
               </View>
               <Text style={[s.brandName, { color: d.accent }]}>Nutriva</Text>
