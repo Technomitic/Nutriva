@@ -365,7 +365,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 16, paddingVertical: 10, borderRadius: 22,
     backgroundColor: 'rgba(46, 125, 50, 0.05)',
-    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   tabActive: { backgroundColor: '#2E7D32', borderColor: '#2E7D32' },
   tabText: { fontSize: 13, fontWeight: '600', color: 'rgba(27, 60, 18, 0.55)' },
@@ -426,14 +426,14 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 14,
     paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.06)',
   },
-  policyIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(46, 125, 50, 0.08)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.10)' },
+  policyIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(46, 125, 50, 0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.10)' },
   policyLinkText: { flex: 1, fontSize: 15, fontWeight: '600', color: '#2E4A26' },
 
   // Policy Page
   policyHeader: { alignItems: 'center', marginBottom: spacing.xl },
   policyHeaderIcon: {
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: 'rgba(46, 125, 50, 0.08)', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.base,
+    backgroundColor: 'rgba(46, 125, 50, 0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.base,
     borderWidth: 1, borderColor: 'rgba(129,199,132,0.2)',
   },
   policyTitle: { fontSize: 22, fontWeight: '700', color: '#1B3C12' },
@@ -447,7 +447,7 @@ const s = StyleSheet.create({
   policyItem: {
     backgroundColor: 'rgba(255, 255, 255, 0.7)', borderRadius: 14,
     padding: spacing.lg, marginBottom: spacing.sm,
-    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   policySectionHeading: {
     fontSize: 15, fontWeight: '700', color: '#1B3C12',

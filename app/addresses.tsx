@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: spacing.base,
     paddingHorizontal: spacing.lg, paddingVertical: spacing.base,
     paddingTop: 48, backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.08)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.15)',
   },
   backBtn: {
     width: 36, height: 36, borderRadius: 18,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(46, 125, 50, 0.05)', borderRadius: radius.md,
     paddingHorizontal: spacing.lg, paddingVertical: 14,
     fontSize: 15, color: '#2E4A26', marginBottom: spacing.base,
-    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   inputMultiline: { minHeight: 80, textAlignVertical: 'top' },
   saveBtn: {
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   addrCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.7)', borderRadius: 16,
     padding: spacing.lg, marginBottom: spacing.base,
-    borderWidth: 1.5, borderColor: 'rgba(46, 125, 50, 0.08)',
+    borderWidth: 1.5, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   addrCardDefault: { borderColor: 'rgba(46, 125, 50, 0.18)' },
   addrTop: { flexDirection: 'row', gap: spacing.base },
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: 'rgba(46, 125, 50, 0.05)',
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   addrLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   addrLabel: { fontSize: 15, fontWeight: '600', color: '#2E4A26' },

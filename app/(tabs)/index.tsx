@@ -71,7 +71,7 @@ function CardImageSlider({ product }: { product: Product }) {
         ) : img.uri ? (
           <Image source={{ uri: img.uri }} style={styles.harvestImg} resizeMode="contain" />
         ) : (
-          <View style={{ width: '85%', height: '85%', borderRadius: 12, backgroundColor: 'rgba(46,125,50,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ width: '85%', height: '85%', borderRadius: 12, backgroundColor: 'rgba(46, 125, 50, 0.15)', alignItems: 'center', justifyContent: 'center' }}>
             <Ionicons name="leaf-outline" size={40} color="rgba(46,125,50,0.2)" />
           </View>
         )}
@@ -453,7 +453,7 @@ export default function HomeScreen() {
             resizeMode="contain"
           />
         ) : (
-          <Animated.View style={[styles.heroImage, heroFloat, { alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(46,125,50,0.08)', borderRadius: 80 }]}>
+          <Animated.View style={[styles.heroImage, heroFloat, { alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(46, 125, 50, 0.15)', borderRadius: 80 }]}>
             <Ionicons name="leaf-outline" size={60} color="rgba(46,125,50,0.2)" />
           </Animated.View>
         )}
@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6, paddingHorizontal: 14,
     borderRadius: 100,
     backgroundColor: 'rgba(46,125,50,0.05)',
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46,125,50,0.15)',
   },
   filterChipActive: {
     backgroundColor: '#2E7D32',
@@ -1219,7 +1219,7 @@ const webStyles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(46, 125, 50, 0.08)',
+    borderBottomColor: 'rgba(46, 125, 50, 0.15)',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
   },
   logoWrap: {
@@ -1250,7 +1250,7 @@ const webStyles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(46, 125, 50, 0.12)',
+    borderColor: 'rgba(46, 125, 50, 0.18)',
     maxWidth: 260,
   },
   addressInfo: {
@@ -1277,7 +1277,7 @@ const webStyles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(46, 125, 50, 0.08)',
+    borderColor: 'rgba(46, 125, 50, 0.15)',
     maxWidth: 420,
   },
   searchInput: {
@@ -1298,7 +1298,7 @@ const webStyles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(46, 125, 50, 0.10)',
+    borderColor: 'rgba(46, 125, 50, 0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',

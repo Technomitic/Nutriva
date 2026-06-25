@@ -691,7 +691,7 @@ const s = StyleSheet.create({
   // ── Review Form ──
   reviewForm: {
     backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16, padding: spacing.lg,
-    marginBottom: spacing.lg, borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    marginBottom: spacing.lg, borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   reviewFormLabel: {
     fontSize: 12, fontWeight: '600', color: 'rgba(27,60,18,0.4)',
@@ -714,7 +714,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingVertical: 8, paddingHorizontal: 12,
     backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 999,
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   attachText: { fontSize: 12, fontWeight: '600', color: '#2E7D32' },
   submitReviewBtn: {
@@ -774,7 +774,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: 'rgba(46, 125, 50, 0.05)', borderRadius: radius.full,
     paddingHorizontal: 4, paddingVertical: 4,
-    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   qtyBtn: {
     width: 36, height: 36, borderRadius: 18,

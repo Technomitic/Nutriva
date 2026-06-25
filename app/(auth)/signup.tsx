@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
 
   // Glass Card
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 22,
     padding: spacing.lg,
     paddingVertical: 24,
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   tabs: {
     flexDirection: 'row', backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderRadius: radius.full, padding: 4, marginBottom: spacing.xl,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   tab: { flex: 1, paddingVertical: 10, borderRadius: radius.full, alignItems: 'center' },
   tabActive: { backgroundColor: 'rgba(255, 255, 255, 0.12)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)' },
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   errorText: { fontSize: 13, color: '#EF9A9A', flex: 1 },
   field: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: radius.md,
     paddingHorizontal: spacing.base, paddingVertical: 14, marginBottom: spacing.base,
     borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: '#1B3C12', paddingVertical: 16,
     borderRadius: radius.full, marginTop: spacing.sm,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   submitBtnLocked: { opacity: 0.35 },
   submitText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   },
   // ── Confirmation Card ──
   confirmCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 22,
     padding: spacing.lg, paddingVertical: 28,
     alignItems: 'center',
@@ -540,12 +540,12 @@ const styles = StyleSheet.create({
   confirmDesc: { fontSize: 15, color: 'rgba(255, 255, 255, 0.55)', textAlign: 'center' },
   confirmEmail: { fontSize: 15, fontWeight: '700', color: '#A5D6A7', marginTop: 4, marginBottom: spacing.base },
   confirmHint: { fontSize: 13, color: 'rgba(255, 255, 255, 0.4)', textAlign: 'center', lineHeight: 20, paddingHorizontal: spacing.base },
-  confirmDivider: { width: '100%', height: 1, backgroundColor: 'rgba(255, 255, 255, 0.08)', marginVertical: spacing.xl },
+  confirmDivider: { width: '100%', height: 1, backgroundColor: 'rgba(255, 255, 255, 0.15)', marginVertical: spacing.xl },
   confirmBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: '#1B3C12', paddingVertical: 16,
     paddingHorizontal: 32, borderRadius: radius.full, width: '100%',
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   confirmBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
   confirmResend: { marginTop: spacing.lg, paddingVertical: 8 },

@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     alignItems: 'center', justifyContent: 'center',
   },
-  orderIconSuccess: { backgroundColor: 'rgba(46, 125, 50, 0.08)' },
+  orderIconSuccess: { backgroundColor: 'rgba(46, 125, 50, 0.15)' },
   orderIconPending: { backgroundColor: 'rgba(245, 124, 0, 0.08)' },
   orderIconCancelled: { backgroundColor: 'rgba(198, 40, 40, 0.08)' },
   orderItemId: { fontSize: 14, fontWeight: '600' },
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   },
   chatBtnSmall: {
     width: 32, height: 32, borderRadius: 16,
-    backgroundColor: 'rgba(46, 125, 50, 0.08)',
+    backgroundColor: 'rgba(46, 125, 50, 0.15)',
     alignItems: 'center', justifyContent: 'center',
     overflow: 'visible' as any,
   },
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
   buyAgainBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingVertical: 4, paddingHorizontal: 10,
-    borderRadius: 100, backgroundColor: 'rgba(46,125,50,0.08)',
+    borderRadius: 100, backgroundColor: 'rgba(46, 125, 50, 0.15)',
     borderWidth: 1, borderColor: 'rgba(46,125,50,0.15)',
   },
   buyAgainText: { fontSize: 11, fontWeight: '600', color: '#2E7D32' },

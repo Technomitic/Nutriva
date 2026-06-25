@@ -9,12 +9,12 @@ import { ViewStyle, TextStyle } from 'react-native';
 const G = {
   cardBg: 'rgba(255, 255, 255, 0.7)',
   cardBgLight: 'rgba(255, 255, 255, 0.55)',
-  cardBorder: 'rgba(46, 125, 50, 0.12)',
-  cardBorderBright: 'rgba(46, 125, 50, 0.22)',
+  cardBorder: 'rgba(46, 125, 50, 0.18)',
+  cardBorderBright: 'rgba(46, 125, 50, 0.30)',
   inputBg: 'rgba(46, 125, 50, 0.06)',
-  inputBorder: 'rgba(46, 125, 50, 0.08)',
+  inputBorder: 'rgba(46, 125, 50, 0.15)',
   pillBg: 'rgba(46, 125, 50, 0.05)',
-  pillBorder: 'rgba(46, 125, 50, 0.08)',
+  pillBorder: 'rgba(46, 125, 50, 0.14)',
   pillActiveBg: 'rgba(46, 125, 50, 0.12)',
   overlayDark: 'rgba(255, 255, 255, 0.9)',
   glow: '#2E7D32',
@@ -94,7 +94,7 @@ export const glass = {
     backgroundColor: 'rgba(46, 125, 50, 0.10)',
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: 'rgba(46, 125, 50, 0.15)',
+    borderColor: 'rgba(46, 125, 50, 0.20)',
   } as ViewStyle,
 
   // Section header text
@@ -106,7 +106,7 @@ export const glass = {
   // Divider
   divider: {
     height: 1,
-    backgroundColor: 'rgba(46, 125, 50, 0.08)',
+    backgroundColor: 'rgba(46, 125, 50, 0.14)',
   } as ViewStyle,
 } as const;
 

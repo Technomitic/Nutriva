@@ -167,7 +167,7 @@ const st = StyleSheet.create({
     paddingHorizontal: spacing.lg, paddingVertical: spacing.base,
     paddingTop: 56,
     backgroundColor: 'rgba(255,255,255,0.9)',
-    borderBottomWidth: 1, borderBottomColor: 'rgba(46,125,50,0.08)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.15)',
   },
   backBtn: {
     width: 40, height: 40, borderRadius: 20,
@@ -194,7 +194,7 @@ const st = StyleSheet.create({
   card: {
     flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.85)',
     borderRadius: 18, padding: spacing.base,
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
     gap: spacing.base,

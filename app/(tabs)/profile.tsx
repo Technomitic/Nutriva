@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   langToggle: {
     flexDirection: 'row', borderRadius: 100, overflow: 'hidden',
     backgroundColor: 'rgba(46,125,50,0.06)',
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46,125,50,0.15)',
   },
   langBtn: {
     paddingVertical: 6, paddingHorizontal: 14,

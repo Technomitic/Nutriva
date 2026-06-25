@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingTop: 56, paddingHorizontal: spacing.lg, paddingBottom: spacing.lg,
     backgroundColor: 'rgba(255,255,255,0.8)',
-    borderBottomWidth: 1, borderBottomColor: 'rgba(46,125,50,0.08)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.15)',
   },
   headerBack: {
     width: 40, height: 40, borderRadius: 20,
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 18,
     padding: spacing.lg, marginBottom: spacing.xl,
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06, shadowRadius: 12, elevation: 2,
   },
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
   productsCard: {
     backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 18,
     padding: spacing.lg, marginBottom: spacing.xl,
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06, shadowRadius: 12, elevation: 2,
   },
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   trackingCard: {
     backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 18,
     padding: spacing.lg, marginBottom: spacing.xl,
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06, shadowRadius: 12, elevation: 2,
   },

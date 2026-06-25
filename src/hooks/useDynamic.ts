@@ -16,7 +16,7 @@ export function useDynamic() {
   const accent = isDark ? '#66BB6A' : '#2E7D32';
   const bg = isDark ? '#0D1B0F' : '#F5F7F5';
   const cardBg = isDark ? 'rgba(20,40,22,0.7)' : 'rgba(255,255,255,0.85)';
-  const border = isDark ? 'rgba(102,187,106,0.15)' : 'rgba(46,125,50,0.08)';
+  const border = isDark ? 'rgba(102,187,106,0.20)' : 'rgba(46,125,50,0.15)';
 
   return {
     isDark,
@@ -34,10 +34,10 @@ export function useDynamic() {
     accentLight: isDark ? 'rgba(102,187,106,0.15)' : 'rgba(46,125,50,0.08)',
     // Borders
     border,
-    borderBright: isDark ? 'rgba(102,187,106,0.25)' : 'rgba(46,125,50,0.15)',
+    borderBright: isDark ? 'rgba(102,187,106,0.30)' : 'rgba(46,125,50,0.22)',
     // Input
     inputBg: isDark ? 'rgba(102,187,106,0.08)' : 'rgba(46,125,50,0.04)',
-    inputBorder: isDark ? 'rgba(102,187,106,0.12)' : 'rgba(46,125,50,0.08)',
+    inputBorder: isDark ? 'rgba(102,187,106,0.18)' : 'rgba(46,125,50,0.15)',
     // Tab bar
     tabBg: isDark ? '#0A1409' : '#FFFFFF',
     tabActive: isDark ? '#66BB6A' : '#2E7D32',
@@ -58,7 +58,7 @@ export function useDynamic() {
       card: { backgroundColor: cardBg, borderColor: border } as const,
       border: { borderColor: border } as const,
       borderBottom: { borderBottomColor: border } as const,
-      input: { backgroundColor: isDark ? 'rgba(102,187,106,0.08)' : 'rgba(46,125,50,0.04)', borderColor: isDark ? 'rgba(102,187,106,0.12)' : 'rgba(46,125,50,0.08)', color: text } as const,
+      input: { backgroundColor: isDark ? 'rgba(102,187,106,0.08)' : 'rgba(46,125,50,0.04)', borderColor: isDark ? 'rgba(102,187,106,0.18)' : 'rgba(46,125,50,0.15)', color: text } as const,
     },
   };
 }

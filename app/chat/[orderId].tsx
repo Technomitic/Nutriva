@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: spacing.base,
     paddingHorizontal: spacing.lg, paddingVertical: spacing.base,
     paddingTop: 48, backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.08)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.15)',
   },
   backBtn: {
     width: 36, height: 36, borderRadius: 18,
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
   uploadingBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 8, backgroundColor: 'rgba(46, 125, 50, 0.06)',
-    borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.08)',
+    borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.15)',
   },
   uploadingText: { fontSize: 13, color: '#2E7D32', fontWeight: '500' },
   // Input
@@ -576,11 +576,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     paddingHorizontal: spacing.lg, paddingVertical: spacing.base,
     paddingBottom: 24, backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.08)',
+    borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.15)',
   },
   attachBtn: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(46, 125, 50, 0.08)',
+    backgroundColor: 'rgba(46, 125, 50, 0.15)',
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.12)',
   },
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
   inputField: {
     flex: 1, backgroundColor: 'rgba(46, 125, 50, 0.05)', borderRadius: radius.full,
     paddingHorizontal: spacing.lg, paddingVertical: 12, fontSize: 15,
-    color: '#2E4A26', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)',
+    color: '#2E4A26', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   sendBtn: {
     width: 44, height: 44, borderRadius: 22,

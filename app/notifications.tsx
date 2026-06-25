@@ -291,12 +291,12 @@ export default function NotificationsScreen() {
 
 const st = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7F5' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.base, paddingHorizontal: spacing.lg, paddingVertical: spacing.base, paddingTop: 48, backgroundColor: 'rgba(255, 255, 255, 0.9)', borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.08)' },
+  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.base, paddingHorizontal: spacing.lg, paddingVertical: spacing.base, paddingTop: 48, backgroundColor: 'rgba(255, 255, 255, 0.9)', borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.15)' },
   backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(46, 125, 50, 0.06)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.10)' },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#1B3C12' },
   unreadBadge: { minWidth: 20, height: 20, borderRadius: 10, backgroundColor: '#EF5350', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
   unreadBadgeText: { fontSize: 10, fontWeight: '700', color: '#fff' },
-  refreshBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(46, 125, 50, 0.06)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)' },
+  refreshBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(46, 125, 50, 0.06)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)' },
   tabRow: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingVertical: spacing.base, backgroundColor: 'rgba(255, 255, 255, 0.9)' },
   tabPill: { paddingVertical: 8, paddingHorizontal: 20, borderRadius: radius.full, backgroundColor: 'rgba(46, 125, 50, 0.05)', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.06)' },
   tabPillActive: { backgroundColor: '#2E7D32', borderColor: 'rgba(46, 125, 50, 0.18)' },
@@ -322,7 +322,7 @@ const st = StyleSheet.create({
   prefsContent: { padding: spacing.lg },
   prefsIntro: { fontSize: 14, color: 'rgba(27, 60, 18, 0.5)', marginBottom: spacing.xl },
   prefRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.base, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.06)' },
-  prefIconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(46, 125, 50, 0.05)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.08)' },
+  prefIconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(46, 125, 50, 0.05)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)' },
   prefLabel: { fontSize: 14, fontWeight: '600', color: '#2E4A26' },
   prefDesc: { fontSize: 11, color: 'rgba(27, 60, 18, 0.5)', marginTop: 2 },
   prefNote: { flexDirection: 'row', gap: spacing.base, alignItems: 'flex-start', marginTop: spacing['2xl'], paddingVertical: spacing.base },

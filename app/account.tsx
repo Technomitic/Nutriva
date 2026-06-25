@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingTop: 56, paddingHorizontal: spacing.lg, paddingBottom: spacing.lg,
     backgroundColor: 'rgba(255,255,255,0.8)',
-    borderBottomWidth: 1, borderBottomColor: 'rgba(46,125,50,0.08)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.15)',
   },
   headerBack: {
     width: 40, height: 40, borderRadius: 20,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 18,
     padding: spacing.lg, marginBottom: spacing.base,
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04, shadowRadius: 12, elevation: 1,
   },
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     fontSize: 15, fontWeight: '500', color: '#2E4A26',
     backgroundColor: 'rgba(46,125,50,0.04)', borderRadius: 12,
     paddingVertical: 12, paddingHorizontal: 14,
-    borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   fieldTextArea: { minHeight: 70, textAlignVertical: 'top' },
   readOnlyRow: {

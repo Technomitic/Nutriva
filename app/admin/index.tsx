@@ -2024,7 +2024,7 @@ export default function AdminScreen() {
                     ))}
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                    <Pressable style={[s.prodDeleteBtn, { backgroundColor: 'rgba(46,125,50,0.08)' }]} onPress={() => {
+                    <Pressable style={[s.prodDeleteBtn, { backgroundColor: 'rgba(46, 125, 50, 0.15)' }]} onPress={() => {
                       setEditingBulkDeal(deal.id);
                       setBf({
                         name: deal.name || '',
@@ -2135,7 +2135,7 @@ export default function AdminScreen() {
                     ))}
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                    <Pressable style={[s.prodDeleteBtn, { backgroundColor: 'rgba(46,125,50,0.08)' }]} onPress={() => {
+                    <Pressable style={[s.prodDeleteBtn, { backgroundColor: 'rgba(46, 125, 50, 0.15)' }]} onPress={() => {
                       setEditingPack(pack.id);
                       setFpf({
                         name: pack.name || '',
@@ -2411,7 +2411,7 @@ export default function AdminScreen() {
                         borderRadius: 16,
                         marginBottom: spacing.base,
                         borderWidth: selectedSupportTicket?.id === ticket.id ? 2 : 1,
-                        borderColor: selectedSupportTicket?.id === ticket.id ? colors.primary : 'rgba(46,125,50,0.08)',
+                        borderColor: selectedSupportTicket?.id === ticket.id ? colors.primary : 'rgba(46, 125, 50, 0.15)',
                         overflow: 'hidden',
                       }}
                     >
@@ -2472,7 +2472,7 @@ export default function AdminScreen() {
                       {/* Expanded: messages + reply */}
                       {selectedSupportTicket?.id === ticket.id && (
                         <View style={{
-                          borderTopWidth: 1, borderTopColor: 'rgba(46,125,50,0.08)',
+                          borderTopWidth: 1, borderTopColor: 'rgba(46, 125, 50, 0.15)',
                           backgroundColor: 'rgba(46,125,50,0.02)',
                         }}>
                           {/* Messages area */}
@@ -2622,7 +2622,7 @@ export default function AdminScreen() {
             return (
               <>
                 {/* Edit mode banner */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(46,125,50,0.08)', padding: 12, borderRadius: 14, marginBottom: spacing.lg, borderWidth: 1, borderColor: 'rgba(46,125,50,0.15)' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(46, 125, 50, 0.15)', padding: 12, borderRadius: 14, marginBottom: spacing.lg, borderWidth: 1, borderColor: 'rgba(46,125,50,0.15)' }}>
                   <Ionicons name="create" size={18} color={colors.primary} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 13, fontWeight: '700', color: '#1B3C12' }}>Editing About Page</Text>
@@ -2731,7 +2731,7 @@ export default function AdminScreen() {
                 {POLICY_SECTIONS.map((pol) => (
                   <View key={pol.key} style={{ marginBottom: spacing.xl }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: spacing.base }}>
-                      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(46,125,50,0.08)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(129,199,132,0.2)' }}>
+                      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(46, 125, 50, 0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(129,199,132,0.2)' }}>
                         <Ionicons name={pol.icon} size={20} color="#2E7D32" />
                       </View>
                       <Text style={{ fontSize: 17, fontWeight: '700', color: '#1B3C12' }}>{pol.title}</Text>
@@ -2900,7 +2900,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: radius.lg, paddingHorizontal: 14, paddingVertical: 10,
-    marginBottom: spacing.base, borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    marginBottom: spacing.base, borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   custSearchInput: {
     flex: 1, fontSize: 14, color: colors.onSurface,
@@ -2925,7 +2925,7 @@ const s = StyleSheet.create({
   },
   custModalHeader: {
     alignItems: 'center', paddingBottom: spacing.lg,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(46,125,50,0.08)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(46, 125, 50, 0.15)',
   },
   custModalAvatar: {
     width: 64, height: 64, borderRadius: 32,
@@ -2945,7 +2945,7 @@ const s = StyleSheet.create({
   },
   custModalCard: {
     backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 14,
-    padding: spacing.base, borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    padding: spacing.base, borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   custModalRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6,
@@ -2979,12 +2979,12 @@ const s = StyleSheet.create({
   custNotifToggle: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: 14, marginTop: spacing.base,
-    backgroundColor: 'rgba(46,125,50,0.08)', borderWidth: 1, borderColor: 'rgba(46,125,50,0.12)',
+    backgroundColor: 'rgba(46, 125, 50, 0.15)', borderWidth: 1, borderColor: 'rgba(46,125,50,0.12)',
   },
   custNotifToggleText: { fontSize: 13, fontWeight: '600', color: '#2E7D32' },
   custNotifForm: {
     backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 14, padding: spacing.base,
-    marginTop: spacing.sm, borderWidth: 1, borderColor: 'rgba(46,125,50,0.08)',
+    marginTop: spacing.sm, borderWidth: 1, borderColor: 'rgba(46, 125, 50, 0.15)',
   },
   custNotifQuickLabel: {
     fontSize: 11, fontWeight: '700', color: 'rgba(27,60,18,0.4)',

@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(46, 125, 50, 0.08)',
+    backgroundColor: 'rgba(46, 125, 50, 0.15)',
     borderWidth: 1,
     borderColor: 'rgba(46, 125, 50, 0.15)',
   },
