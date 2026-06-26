@@ -5,7 +5,7 @@
  */
 
 /** Base URL of the deployed web app (NO trailing slash) */
-export const SITE_URL = 'https://fresh-app-ivory-three.vercel.app';
+export const SITE_URL = 'https://nutriva-pied.vercel.app';
 
 /** Brand constants */
 export const BRAND = {

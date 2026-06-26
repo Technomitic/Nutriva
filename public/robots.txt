@@ -12,4 +12,4 @@ Disallow: /chat/
 Disallow: /order/
 Disallow: /reset-password
 
-Sitemap: https://fresh-app-ivory-three.vercel.app/sitemap.xml
+Sitemap: https://nutriva-pied.vercel.app/sitemap.xml
