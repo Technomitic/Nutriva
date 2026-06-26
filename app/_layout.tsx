@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SEOHead } from '../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../src/config/seo';
 import {
   useFonts,
   Manrope_400Regular,
@@ -179,6 +181,7 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SEOHead {...PAGE_SEO.home} />
       <StatusBar style={useThemeStore.getState().isDark ? 'light' : 'dark'} />
       <AuthGuard>
         <Stack screenOptions={{ headerShown: false }} />

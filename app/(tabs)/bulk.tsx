@@ -12,6 +12,8 @@ import { useUIStore } from '../../src/stores/uiStore';
 import { useHeroEntrance, useStaggerEntrance, useCardEntrance3D } from '../../src/utils/animations';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import { useT } from '../../src/i18n';
+import { SEOHead } from '../../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../../src/config/seo';
 
 export default function BulkScreen() {
   const addItem = useCartStore((s) => s.addItem);
@@ -59,6 +61,7 @@ export default function BulkScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: d.bg }]} showsVerticalScrollIndicator={false}>
+      <SEOHead {...PAGE_SEO.bulk} />
       <Animated.View style={[styles.header, headerAnim]}>
         <Text style={[styles.headerTitle, { color: d.text }]}>{t('bulk.title')}</Text>
         <Text style={[styles.headerSub, { color: d.textMuted }]}>{t('bulk.subtitle')}</Text>

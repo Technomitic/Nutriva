@@ -16,6 +16,8 @@ import { useOrderStore } from '../src/stores/orderStore';
 import { ChatMessage, Order, SupportTicket, SupportMessage } from '../src/types';
 import { supabase } from '../src/api/supabase';
 import { useDynamic } from '../src/hooks/useDynamic';
+import { SEOHead } from '../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../src/config/seo';
 
 type SupportTopic = {
   id: string;
@@ -595,6 +597,7 @@ export default function SupportScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <SEOHead {...PAGE_SEO.support} />
       {renderHeader()}
       {screen === 'topics' && renderTopics()}
       {screen === 'pick-order' && renderOrderPicker()}

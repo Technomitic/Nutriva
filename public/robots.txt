@@ -1,0 +1,15 @@
+# Nutriva — robots.txt
+# Allow all search engines to crawl public pages
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /addresses
+Disallow: /notifications
+Disallow: /wishlist
+Disallow: /chat/
+Disallow: /order/
+Disallow: /reset-password
+
+Sitemap: https://fresh-app-ivory-three.vercel.app/sitemap.xml

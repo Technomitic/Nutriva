@@ -17,6 +17,8 @@ import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import { sanitizeError } from '../../src/utils/sanitizeError';
+import { SEOHead } from '../../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../../src/config/seo';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 const FRUITS = ['🍎', '🍊', '🍋', '🍇', '🍓', '🥭', '🍑', '🍌', '🫐', '🍒', '🥝', '🍍'];
@@ -200,6 +202,7 @@ export default function SignupScreen() {
   // ── Main signup form ──
   return (
     <View style={[styles.container, { backgroundColor: d.bg }]}>
+      <SEOHead {...PAGE_SEO.signup} />
       {/* Animated Background */}
       <View style={styles.bgLayer}>
         {fruits.map((f, i) => <FloatingFruit key={i} {...f} />)}

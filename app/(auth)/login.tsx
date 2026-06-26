@@ -17,6 +17,8 @@ import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import { sanitizeError } from '../../src/utils/sanitizeError';
+import { SEOHead } from '../../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../../src/config/seo';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 
@@ -160,6 +162,7 @@ export default function LoginScreen() {
 
   return (
     <View style={[styles.container, d.s.screenBg]}>
+      <SEOHead {...PAGE_SEO.login} />
       {/* Animated Background */}
       <View style={styles.bgLayer}>
         {fruits.map((f, i) => (

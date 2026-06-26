@@ -20,6 +20,8 @@ import { supabase } from '../../src/api/supabase';
 import { products as localProducts } from '../../src/data/products';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import { useT } from '../../src/i18n';
+import { SEOHead } from '../../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../../src/config/seo';
 
 export default function OrdersScreen() {
   const router = useRouter();
@@ -138,6 +140,7 @@ export default function OrdersScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: d.bg }]} showsVerticalScrollIndicator={false}>
+      <SEOHead {...PAGE_SEO.orders} />
       <Animated.View style={[styles.header, headerAnim]}>
         <Text style={[styles.headerTitle, { color: d.text }]}>{t('orders.title')}</Text>
         <Text style={[styles.headerSub, { color: d.textMuted }]}>{t('orders.subtitle')}</Text>

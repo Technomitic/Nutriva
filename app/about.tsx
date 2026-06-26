@@ -10,6 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius } from '../src/theme';
 import { supabase } from '../src/api/supabase';
 import { useDynamic } from '../src/hooks/useDynamic';
+import { SEOHead } from '../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../src/config/seo';
 
 const APP_VERSION = '1.0.0';
 
@@ -201,6 +203,7 @@ export default function AboutScreen() {
 
   return (
     <View style={[s.container, { backgroundColor: d.bg }]}>
+      <SEOHead {...PAGE_SEO.about} />
       {/* Header */}
       <View style={s.header}>
         <Pressable style={[s.backBtn, { backgroundColor: d.accentLight, borderColor: d.border }]} onPress={() => router.replace('/(tabs)/profile')}>

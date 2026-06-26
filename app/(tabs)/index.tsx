@@ -22,6 +22,8 @@ import { Product } from '../../src/types';
 import { supabase } from '../../src/api/supabase';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import { useT } from '../../src/i18n';
+import { SEOHead } from '../../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../../src/config/seo';
 import {
   useHeroEntrance, useStaggerEntrance, useCardEntrance3D,
   useSectionEntrance, useFloating, useParallaxScroll,
@@ -314,6 +316,8 @@ export default function HomeScreen() {
   const featuredAnim = useCardEntrance3D(600);
 
   return (
+    <>
+    <SEOHead {...PAGE_SEO.home} />
     <Animated.ScrollView
       style={[styles.container, { backgroundColor: d.bg }]}
       showsVerticalScrollIndicator={false}
@@ -692,6 +696,7 @@ export default function HomeScreen() {
 
       <View style={{ height: 40 }} />
     </Animated.ScrollView>
+    </>
   );
 }
 

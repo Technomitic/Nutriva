@@ -19,6 +19,8 @@ import { useUIStore } from '../../src/stores/uiStore';
 import { supabase } from '../../src/api/supabase';
 import { Review, Product } from '../../src/types';
 import { useDynamic } from '../../src/hooks/useDynamic';
+import { SEOHead } from '../../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../../src/config/seo';
 
 const { width: SW } = Dimensions.get('window');
 const IMG_HEIGHT = 380;
@@ -349,8 +351,11 @@ export default function ProductDetailScreen() {
     </View>
   );
 
+  const productSeo = product ? PAGE_SEO.product(product.name, product.description) : PAGE_SEO.product('Product');
+
   return (
     <View style={[s.container, { backgroundColor: d.bg }]}>
+      <SEOHead {...productSeo} path={`/product/${id}`} />
       {/* Close Button */}
       <Pressable style={[s.closeBtn, { backgroundColor: d.cardBg, borderColor: d.border }]} onPress={() => router.back()}>
         <Ionicons name="close" size={24} color={d.text} />

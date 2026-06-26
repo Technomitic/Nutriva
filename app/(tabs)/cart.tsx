@@ -16,6 +16,8 @@ import { useCouponStore } from '../../src/stores/couponStore';
 import { useStaggerEntrance, useHeroEntrance, useCardEntrance3D } from '../../src/utils/animations';
 import { useDynamic } from '../../src/hooks/useDynamic';
 import { useT } from '../../src/i18n';
+import { SEOHead } from '../../src/components/ui/SEOHead';
+import { PAGE_SEO } from '../../src/config/seo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ADDRESSES_KEY = 'fresh-addresses';
@@ -146,6 +148,7 @@ export default function CartScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: d.bg }]}>
+      <SEOHead {...PAGE_SEO.cart} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
