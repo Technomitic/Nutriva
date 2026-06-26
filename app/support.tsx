@@ -123,9 +123,19 @@ export default function SupportScreen() {
             filter: `order_id=eq.${selectedOrder.id}`,
           },
           (payload) => {
+            const real = payload.new as ChatMessage;
             setMessages((prev) => {
-              if (prev.some((m) => m.id === (payload.new as any).id)) return prev;
-              return [...prev, payload.new as ChatMessage];
+              if (prev.some((m) => m.id === real.id)) return prev;
+              // Replace optimistic temp message with the real one
+              const tempIdx = prev.findIndex(
+                (m) => m.id.startsWith('temp-') && m.sender === real.sender && m.text === real.text
+              );
+              if (tempIdx !== -1) {
+                const updated = [...prev];
+                updated[tempIdx] = real;
+                return updated;
+              }
+              return [...prev, real];
             });
           }
         )
@@ -177,7 +187,17 @@ export default function SupportScreen() {
               created_at: m.created_at,
             };
             setMessages((prev) => {
+              // Already have the real message — skip
               if (prev.some((msg) => msg.id === m.id)) return prev;
+              // Replace optimistic temp message with the real one
+              const tempIdx = prev.findIndex(
+                (msg) => msg.id.startsWith('temp-') && msg.sender === m.sender && msg.text === m.text
+              );
+              if (tempIdx !== -1) {
+                const updated = [...prev];
+                updated[tempIdx] = mapped;
+                return updated;
+              }
               return [...prev, mapped];
             });
           }
