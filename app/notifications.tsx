@@ -21,6 +21,7 @@ const PREFS_KEY = 'fresh-notif-prefs';
 
 interface AppNotification {
   id: string;
+  user_id?: string;
   title: string;
   body: string;
   type: string;

@@ -3114,4 +3114,13 @@ const s = StyleSheet.create({
   promoMeta: { minWidth: 70 },
   promoMetaLabel: { fontSize: 11, color: colors.outline, marginBottom: 2 },
   promoMetaValue: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
+  // Promo form fields (coupon create/edit)
+  formCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: radius.lg, padding: spacing.lg, marginBottom: spacing.xl, borderWidth: 2, borderColor: colors.primaryFixedDim },
+  formTitle: { fontSize: 16, fontWeight: '700', marginBottom: spacing.base, color: colors.onSurface },
+  fieldLabel: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant, marginBottom: 6 },
+  fieldInput: { backgroundColor: colors.surfaceContainerHigh, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: colors.onSurface, marginBottom: spacing.sm },
+  saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, paddingHorizontal: 20, borderRadius: radius.full, backgroundColor: colors.primary },
+  saveBtnText: { fontSize: 13, fontWeight: '600', color: colors.onPrimary },
+  cancelBtn: { alignItems: 'center', justifyContent: 'center', paddingVertical: 12, paddingHorizontal: 20, borderRadius: radius.full, backgroundColor: colors.surfaceContainerHigh },
+  cancelBtnText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },
 });

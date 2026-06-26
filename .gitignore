@@ -46,3 +46,7 @@ yarn-error.*
 play-store-key.json
 google-services.json
 GoogleService-Info.plist
+
+# Supabase
+supabase/.temp/
+supabase/migrations/
